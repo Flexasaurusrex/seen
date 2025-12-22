@@ -61,7 +61,11 @@ export default async function handler(req, res) {
   }
 
   try {
-    const id = req.url.split('/').filter(Boolean).pop().replace('activate', '').replace(/[^\d]/g, '');
+    const { id } = req.query;
+    
+    if (!id) {
+      return res.status(400).json({ error: 'Missing keyword ID' });
+    }
     
     await sql`UPDATE keywords SET is_active = false`;
     const keyword = await sql`UPDATE keywords SET is_active = true WHERE id = ${id} RETURNING *`;
@@ -91,9 +95,14 @@ export default async function handler(req, res) {
 
     await sql`UPDATE settings SET value = NOW()::TEXT WHERE key = 'last_rotation'`;
 
-    return res.json({ keyword: keyword.rows[0], nftCount: nfts.length });
+    return res.json({ success: true, keyword: keyword.rows[0], nftCount: nfts.length });
   } catch (error) {
     console.error('Activate error:', error);
     return res.status(500).json({ error: error.message });
   }
 }
+```
+
+Create folder structure:
+```
+api/admin/keywords/[id]/activate.js
