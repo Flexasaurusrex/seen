@@ -9,6 +9,7 @@ export default function Gallery() {
   const [currentKeyword, setCurrentKeyword] = useState('');
   const [loading, setLoading] = useState(true);
   const [fade, setFade] = useState(true);
+  const [fullscreen, setFullscreen] = useState(false);
 
   // Fetch gallery data
   useEffect(() => {
@@ -100,35 +101,35 @@ export default function Gallery() {
       <div className="gallery-empty">
         <div className="gallery-bg"></div>
         
-        <div className="gallery-content">
-          <header className="gallery-header">
-            <div className="header-left">
-              <h1 className="gallery-title">SEEN</h1>
-              <p className="gallery-tagline">Because being seen is enough.</p>
-            </div>
-          </header>
+        <header className="gallery-header">
+          <div className="header-left">
+            <h1 className="gallery-title">SEEN</h1>
+            <p className="gallery-tagline">Because being seen is enough.</p>
+          </div>
+        </header>
 
+        <div className="gallery-content">
           <div className="empty-container">
             <div className="empty-box">
               <div className="empty-text">NO ARTWORK AVAILABLE</div>
             </div>
           </div>
-
-          <footer className="gallery-footer">
-            <div className="footer-manifesto">
-              SEEN is an anti-marketplace that uses public infrastructure to display artists' work without fees, friction, or obligation—because art deserves to be seen, not sold to be visible.
-            </div>
-            <div className="footer-meta">
-              <span>Visibility is not a transaction.</span>
-              <span className="footer-separator">·</span>
-              <span>SEEN does not take a cut.</span>
-              <span className="footer-separator">·</span>
-              <span>SEEN does not optimize engagement.</span>
-              <span className="footer-separator">·</span>
-              <span>SEEN does not ask artists for anything.</span>
-            </div>
-          </footer>
         </div>
+
+        <footer className="gallery-footer">
+          <div className="footer-manifesto">
+            SEEN is an anti-marketplace that uses public infrastructure to display artists' work without fees, friction, or obligation—because art deserves to be seen, not sold to be visible.
+          </div>
+          <div className="footer-meta">
+            <span>Visibility is not a transaction.</span>
+            <span className="footer-separator">·</span>
+            <span>SEEN does not take a cut.</span>
+            <span className="footer-separator">·</span>
+            <span>SEEN does not optimize engagement.</span>
+            <span className="footer-separator">·</span>
+            <span>SEEN does not ask artists for anything.</span>
+          </div>
+        </footer>
       </div>
     );
   }
@@ -136,7 +137,7 @@ export default function Gallery() {
   const currentNFT = nfts[currentIndex];
 
   return (
-    <div className="gallery">
+    <div className={`gallery ${fullscreen ? 'fullscreen' : ''}`}>
       <div className="gallery-bg"></div>
       
       <div className="gallery-content">
@@ -176,6 +177,13 @@ export default function Gallery() {
             ></div>
           </div>
         </div>
+
+        <button 
+          className="fullscreen-toggle"
+          onClick={() => setFullscreen(!fullscreen)}
+        >
+          {fullscreen ? 'EXIT FULLSCREEN' : 'FULLSCREEN'}
+        </button>
 
         <footer className="gallery-footer">
           <div className="footer-manifesto">
