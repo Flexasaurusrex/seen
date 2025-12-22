@@ -51,7 +51,8 @@ export default function Gallery() {
 
   async function fetchCollectionInfo() {
     try {
-      const response = await fetch(`${API_BASE}/admin/collections/collections`);
+      // NEW: Use public endpoint instead of admin endpoint
+      const response = await fetch(`${API_BASE}/collections`);
       const collections = await response.json();
       const activeCollection = collections.find(c => c.is_active);
       if (activeCollection) {
@@ -286,28 +287,11 @@ export default function Gallery() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.5rem' }}>
             <div className="nft-counter">{currentIndex + 1} of {nfts.length}</div>
             {currentNFT.chain && (
-              <span style={{
-                padding: '0.25rem 0.5rem',
-                background: '#333',
-                color: '#aaa',
-                fontSize: '0.7rem',
-                borderRadius: '3px',
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em'
-              }}>
+              <span className="chain-badge">
                 {currentNFT.chain}
               </span>
             )}
-            <span style={{
-              padding: '0.25rem 0.5rem',
-              background: galleryMode === 'curated' ? '#4f4' : '#333',
-              color: galleryMode === 'curated' ? '#000' : '#aaa',
-              fontSize: '0.7rem',
-              borderRadius: '3px',
-              textTransform: 'uppercase',
-              letterSpacing: '0.05em',
-              fontWeight: galleryMode === 'curated' ? 'bold' : 'normal'
-            }}>
+            <span className="mode-badge" data-mode={galleryMode}>
               {galleryMode === 'curated' ? 'CURATED' : 'RANDOM'}
             </span>
           </div>
