@@ -14,7 +14,7 @@ export default function Gallery() {
   const [brokenImages, setBrokenImages] = useState(new Set());
   const [galleryMode, setGalleryMode] = useState('random');
   
-  // NEW: Modal state
+  // Modal state
   const [collectionInfo, setCollectionInfo] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
@@ -33,7 +33,7 @@ export default function Gallery() {
       setCurrentIndex(0);
       setLoading(false);
       
-      // NEW: If curated mode and we have collections, fetch collection info
+      // If curated mode and we have collections, fetch collection info
       if (galleryMode === 'curated' && data.collections) {
         fetchCollectionInfo();
         setShowModal(true); // Auto-open modal
@@ -51,7 +51,6 @@ export default function Gallery() {
     }
   }
 
-  // NEW: Fetch collection details
   async function fetchCollectionInfo() {
     try {
       const response = await fetch(`${API_BASE}/admin/collections/collections`);
@@ -83,7 +82,7 @@ export default function Gallery() {
         body: JSON.stringify({ nftId })
       });
     } catch (error) {
-      console.error('Error tracking view:', error);
+      // Silent fail
     }
   }
 
@@ -95,7 +94,7 @@ export default function Gallery() {
         body: JSON.stringify({ nftId })
       });
     } catch (error) {
-      console.error('Error tracking click:', error);
+      // Silent fail
     }
   }
 
@@ -119,16 +118,12 @@ export default function Gallery() {
     
     nextImage.onload = () => {
       setFade(false);
-      
       setTimeout(() => {
         setCurrentIndex(nextIndex);
         if (nfts[nextIndex]) {
           trackView(nfts[nextIndex].id);
         }
-        
-        setTimeout(() => {
-          setFade(true);
-        }, 50);
+        setTimeout(() => setFade(true), 50);
       }, 400);
     };
     
@@ -160,16 +155,12 @@ export default function Gallery() {
     
     prevImage.onload = () => {
       setFade(false);
-      
       setTimeout(() => {
         setCurrentIndex(prevIndex);
         if (nfts[prevIndex]) {
           trackView(nfts[prevIndex].id);
         }
-        
-        setTimeout(() => {
-          setFade(true);
-        }, 50);
+        setTimeout(() => setFade(true), 50);
       }, 400);
     };
     
@@ -251,6 +242,36 @@ export default function Gallery() {
     <div className={`gallery ${fullscreen ? 'fullscreen' : ''}`}>
       <div className="gallery-bg"></div>
       
+      {/* Collection Info Modal */}
+      {showModal && collectionInfo && (
+        <>
+          <div className="modal-overlay" onClick={() => setShowModal(false)} />
+          <div className="collection-modal">
+            <button 
+              className="modal-close"
+              onClick={() => setShowModal(false)}
+              aria-label="Close"
+            >
+              ×
+            </button>
+            <h2 className="modal-collection-title">{collectionInfo.name}</h2>
+            <p className="modal-collection-description">{collectionInfo.description}</p>
+          </div>
+        </>
+      )}
+
+      {/* Info Button - Shows when modal is closed in curated mode */}
+      {galleryMode === 'curated' && !showModal && collectionInfo && (
+        <button 
+          className="collection-info-button"
+          onClick={() => setShowModal(true)}
+          title="View Collection Info"
+          aria-label="View Collection Info"
+        >
+          ℹ
+        </button>
+      )}
+      
       <div className="gallery-content">
         <header className="gallery-header">
           <div className="header-left">
@@ -258,34 +279,6 @@ export default function Gallery() {
             <p className="gallery-tagline">Because being seen is enough.</p>
           </div>
         </header>
-
-        {/* NEW: Info button (only show in curated mode when modal is closed) */}
-        {galleryMode === 'curated' && !showModal && collectionInfo && (
-          <button 
-            className="info-button"
-            onClick={() => setShowModal(true)}
-            title="Collection Info"
-          >
-            ℹ
-          </button>
-        )}
-
-        {/* NEW: Collection Info Modal */}
-        {showModal && collectionInfo && (
-          <>
-            <div className="modal-overlay" onClick={() => setShowModal(false)} />
-            <div className="collection-modal">
-              <button 
-                className="modal-close"
-                onClick={() => setShowModal(false)}
-              >
-                ×
-              </button>
-              <h2 className="modal-title">{collectionInfo.name}</h2>
-              <p className="modal-description">{collectionInfo.description}</p>
-            </div>
-          </>
-        )}
 
         <div className="mode-toggle">
           <button 
@@ -316,7 +309,6 @@ export default function Gallery() {
               onError={() => {
                 const imageUrl = currentNFT.image_url;
                 if (!brokenImages.has(imageUrl)) {
-                  console.warn('Image failed to load:', imageUrl);
                   setBrokenImages(prev => new Set([...prev, imageUrl]));
                   goToNext();
                 }
