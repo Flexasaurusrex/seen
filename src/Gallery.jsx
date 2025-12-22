@@ -12,11 +12,15 @@ export default function Gallery() {
   const [fullscreen, setFullscreen] = useState(false);
   const [isPlaying, setIsPlaying] = useState(true);
   const [brokenImages, setBrokenImages] = useState(new Set());
-  const [galleryMode, setGalleryMode] = useState('random'); // NEW: 'random' or 'curated'
+  const [galleryMode, setGalleryMode] = useState('random');
+  
+  // NEW: Modal state
+  const [collectionInfo, setCollectionInfo] = useState(null);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     fetchGallery();
-  }, [galleryMode]); // NEW: Re-fetch when mode changes
+  }, [galleryMode]);
 
   async function fetchGallery() {
     setLoading(true);
@@ -26,8 +30,17 @@ export default function Gallery() {
       
       setNfts(data.nfts || []);
       setCurrentKeyword(data.keywords || data.collections || '');
-      setCurrentIndex(0); // Reset to first NFT when switching modes
+      setCurrentIndex(0);
       setLoading(false);
+      
+      // NEW: If curated mode and we have collections, fetch collection info
+      if (galleryMode === 'curated' && data.collections) {
+        fetchCollectionInfo();
+        setShowModal(true); // Auto-open modal
+      } else {
+        setShowModal(false);
+        setCollectionInfo(null);
+      }
       
       if (data.nfts && data.nfts.length > 0) {
         trackView(data.nfts[0].id);
@@ -35,6 +48,20 @@ export default function Gallery() {
     } catch (error) {
       console.error('Error fetching gallery:', error);
       setLoading(false);
+    }
+  }
+
+  // NEW: Fetch collection details
+  async function fetchCollectionInfo() {
+    try {
+      const response = await fetch(`${API_BASE}/admin/collections/collections`);
+      const collections = await response.json();
+      const activeCollection = collections.find(c => c.is_active);
+      if (activeCollection) {
+        setCollectionInfo(activeCollection);
+      }
+    } catch (error) {
+      console.error('Error fetching collection info:', error);
     }
   }
 
@@ -181,7 +208,6 @@ export default function Gallery() {
           </div>
         </header>
 
-        {/* NEW: Mode toggle even when empty */}
         <div className="mode-toggle">
           <button 
             className={`mode-button ${galleryMode === 'random' ? 'active' : ''}`}
@@ -233,7 +259,34 @@ export default function Gallery() {
           </div>
         </header>
 
-        {/* NEW: Mode toggle button */}
+        {/* NEW: Info button (only show in curated mode when modal is closed) */}
+        {galleryMode === 'curated' && !showModal && collectionInfo && (
+          <button 
+            className="info-button"
+            onClick={() => setShowModal(true)}
+            title="Collection Info"
+          >
+            ℹ
+          </button>
+        )}
+
+        {/* NEW: Collection Info Modal */}
+        {showModal && collectionInfo && (
+          <>
+            <div className="modal-overlay" onClick={() => setShowModal(false)} />
+            <div className="collection-modal">
+              <button 
+                className="modal-close"
+                onClick={() => setShowModal(false)}
+              >
+                ×
+              </button>
+              <h2 className="modal-title">{collectionInfo.name}</h2>
+              <p className="modal-description">{collectionInfo.description}</p>
+            </div>
+          </>
+        )}
+
         <div className="mode-toggle">
           <button 
             className={`mode-button ${galleryMode === 'random' ? 'active' : ''}`}
@@ -290,7 +343,6 @@ export default function Gallery() {
                 {currentNFT.chain}
               </span>
             )}
-            {/* NEW: Show mode indicator */}
             <span style={{
               padding: '0.25rem 0.5rem',
               background: galleryMode === 'curated' ? '#4f4' : '#333',
