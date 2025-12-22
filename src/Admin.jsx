@@ -151,7 +151,7 @@ function Admin() {
   // ===== CONTRACTS =====
   const loadContracts = async () => {
     try {
-      const res = await fetch(`${API_BASE}/api/admin/contracts`, { headers: authHeaders() });
+      const res = await fetch(`${API_BASE}/api/admin/contracts/contracts`, { headers: authHeaders() });
       if (res.ok) {
         const data = await res.json();
         setContracts(data);
@@ -207,7 +207,7 @@ function Admin() {
 
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/admin/contracts`, {
+      const res = await fetch(`${API_BASE}/api/admin/contracts/contracts`, {
         method: 'POST',
         headers: authHeaders(),
         body: JSON.stringify({
@@ -245,7 +245,7 @@ function Admin() {
 
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/admin/contracts?id=${id}`, {
+      const res = await fetch(`${API_BASE}/api/admin/contracts/contracts?id=${id}`, {
         method: 'DELETE',
         headers: authHeaders()
       });
@@ -289,7 +289,7 @@ function Admin() {
   // ===== COLLECTIONS =====
   const loadCollections = async () => {
     try {
-      const res = await fetch(`${API_BASE}/api/admin/collections`, { headers: authHeaders() });
+      const res = await fetch(`${API_BASE}/api/admin/collections/collections`, { headers: authHeaders() });
       if (res.ok) {
         const data = await res.json();
         setCollections(data);
@@ -305,7 +305,7 @@ function Admin() {
 
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/admin/collections`, {
+      const res = await fetch(`${API_BASE}/api/admin/collections/collections`, {
         method: 'POST',
         headers: authHeaders(),
         body: JSON.stringify(newCollection)
@@ -328,7 +328,7 @@ function Admin() {
   const toggleCollectionActive = async (id, currentState, name) => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/admin/collections`, {
+      const res = await fetch(`${API_BASE}/api/admin/collections/collections`, {
         method: 'PUT',
         headers: authHeaders(),
         body: JSON.stringify({ id, isActive: !currentState })
@@ -351,7 +351,7 @@ function Admin() {
 
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/admin/collections?id=${id}`, {
+      const res = await fetch(`${API_BASE}/api/admin/collections/collections?id=${id}`, {
         method: 'DELETE',
         headers: authHeaders()
       });
