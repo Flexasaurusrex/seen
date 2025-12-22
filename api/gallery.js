@@ -74,9 +74,9 @@ async function getCuratedGallery(res) {
   // Get all contracts from active collections
   const collectionIds = activeCollections.rows.map(c => c.id);
   const contractsInCollections = await sql`
-    SELECT DISTINCT cc.contract_id, ctr.contract_address, ctr.chain, ctr.collection_name, ctr.artist_name
+    SELECT DISTINCT ctr.id as contract_id, ctr.contract_address, ctr.chain, ctr.collection_name, ctr.artist_name
     FROM collection_contracts cc
-    JOIN curated_contracts ctr ON cc.id = ctr.id
+    JOIN curated_contracts ctr ON cc.contract_id = ctr.id
     WHERE cc.collection_id = ANY(${collectionIds})
       AND ctr.is_active = true
     ORDER BY cc.sort_order ASC
@@ -95,11 +95,16 @@ async function getCuratedGallery(res) {
   const contractIds = contractsInCollections.rows.map(c => c.contract_id);
   const nfts = await sql`
     SELECT 
-      cn.*,
+      cn.id,
+      cn.token_id,
+      cn.title,
+      cn.description,
+      cn.image_url,
+      cn.external_url,
       ctr.contract_address,
       ctr.chain,
       ctr.collection_name,
-      ctr.artist_name
+      ctr.artist_name as creator_name
     FROM curated_nft_cache cn
     JOIN curated_contracts ctr ON cn.contract_id = ctr.id
     WHERE cn.contract_id = ANY(${contractIds})
