@@ -110,8 +110,11 @@ export default function Gallery() {
         }
         return next;
       });
-      setFade(true);
-    }, 300);
+      
+      setTimeout(() => {
+        setFade(true);
+      }, 50);
+    }, 400);
   }
 
   function goToPrevious() {
@@ -130,8 +133,11 @@ export default function Gallery() {
         }
         return next;
       });
-      setFade(true);
-    }, 300);
+      
+      setTimeout(() => {
+        setFade(true);
+      }, 50);
+    }, 400);
   }
 
   if (loading) {
