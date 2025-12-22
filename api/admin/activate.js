@@ -28,8 +28,13 @@ async function buildGalleryNFTs(keyword) {
     const MAX_CONTRACTS = 500;
     const contractsToSearch = Math.min(contracts.length, MAX_CONTRACTS);
     
+    console.log(`Searching ${contractsToSearch} contracts for ${keyword}...`);
+    
     for (let i = 0; i < contractsToSearch; i++) {
-      if (nfts.length >= MAX_NFTS) break;
+      if (nfts.length >= MAX_NFTS) {
+        console.log(`Reached ${MAX_NFTS} NFTs, stopping search`);
+        break;
+      }
       
       const contract = contracts[i];
       
@@ -56,15 +61,22 @@ async function buildGalleryNFTs(keyword) {
           }
         }
         
-        // Add small delay every 10 contracts to avoid rate limits
-        if (i % 10 === 0 && i > 0) {
-          await delay(100);
+        // Aggressive delay after every contract to avoid rate limits
+        await delay(100);
+        
+        // Log progress every 50 contracts
+        if (i % 50 === 0 && i > 0) {
+          console.log(`Processed ${i} contracts, found ${nfts.length} NFTs so far...`);
         }
       } catch (err) {
-        console.error('Contract error:', err);
+        console.error(`Contract ${i} error:`, err.message);
+        // Still delay even on error to avoid hammering API
+        await delay(100);
         continue;
       }
     }
+    
+    console.log(`Final result: ${nfts.length} NFTs from ${contractsToSearch} contracts`);
     return nfts;
   } catch (error) {
     console.error('Search error:', error);
