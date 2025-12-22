@@ -74,7 +74,13 @@ async function getCuratedGallery(res) {
   // Get all contracts from active collections
   const collectionIds = activeCollections.rows.map(c => c.id);
   const contractsInCollections = await sql`
-    SELECT DISTINCT ctr.id as contract_id, ctr.contract_address, ctr.chain, ctr.collection_name, ctr.artist_name
+    SELECT DISTINCT 
+      ctr.id as contract_id, 
+      ctr.contract_address, 
+      ctr.chain, 
+      ctr.collection_name, 
+      ctr.artist_name,
+      cc.sort_order
     FROM collection_contracts cc
     JOIN curated_contracts ctr ON cc.contract_id = ctr.id
     WHERE cc.collection_id = ANY(${collectionIds})
