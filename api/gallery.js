@@ -16,16 +16,22 @@ export default async function handler(req, res) {
       return res.json({ nfts: [], keywords: [] });
     }
 
-    // Get NFTs from all active keywords
+    // Get NFTs from all active keywords - NO RANDOM, shuffle client-side
     const keywordIds = activeKeywords.rows.map(k => k.id);
     const nfts = await sql`
       SELECT * FROM nft_cache 
       WHERE keyword_id = ANY(${keywordIds})
-      ORDER BY RANDOM()
     `;
 
+    // Shuffle array using Fisher-Yates
+    const shuffled = [...nfts.rows];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+
     return res.json({ 
-      nfts: nfts.rows,
+      nfts: shuffled,
       keywords: activeKeywords.rows.map(k => k.keyword).join(', ')
     });
   } catch (error) {
