@@ -12,7 +12,7 @@ export default async function handler(req, res) {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `;
-
+    
     await sql`
       CREATE TABLE IF NOT EXISTS nft_cache (
         id SERIAL PRIMARY KEY,
@@ -27,14 +27,17 @@ export default async function handler(req, res) {
         cached_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `;
-
+    
+    // Add chain column if it doesn't exist
+    await sql`ALTER TABLE nft_cache ADD COLUMN IF NOT EXISTS chain VARCHAR(20)`;
+    
     await sql`
       CREATE TABLE IF NOT EXISTS settings (
         key TEXT PRIMARY KEY,
         value TEXT NOT NULL
       )
     `;
-
+    
     await sql`
       CREATE TABLE IF NOT EXISTS analytics (
         id SERIAL PRIMARY KEY,
@@ -43,12 +46,12 @@ export default async function handler(req, res) {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `;
-
+    
     await sql`INSERT INTO settings (key, value) VALUES ('rotation_hours', '24') ON CONFLICT (key) DO NOTHING`;
     await sql`INSERT INTO settings (key, value) VALUES ('max_nfts', '50') ON CONFLICT (key) DO NOTHING`;
     await sql`INSERT INTO settings (key, value) VALUES ('auto_rotate', 'true') ON CONFLICT (key) DO NOTHING`;
     await sql`INSERT INTO settings (key, value) VALUES ('last_rotation', NOW()::TEXT) ON CONFLICT (key) DO NOTHING`;
-
+    
     return res.status(200).json({ success: true, message: 'Database initialized successfully' });
   } catch (error) {
     console.error('Database init error:', error);
