@@ -24,7 +24,6 @@ body {
   width: 100vw;
 }
 
-/* Main Container */
 .gallery {
   position: fixed;
   top: 0;
@@ -54,7 +53,6 @@ body {
   flex-direction: column;
 }
 
-/* Header - Minimal Top Bar */
 .gallery-header {
   position: fixed;
   top: 0;
@@ -91,7 +89,6 @@ body {
   color: var(--gray-light);
 }
 
-/* Mode Toggle - In Header */
 .mode-toggle {
   position: fixed;
   top: 2rem;
@@ -134,7 +131,6 @@ body {
   font-weight: 700;
 }
 
-/* Hero Section - Art is King */
 .nft-hero {
   position: fixed;
   top: 6rem;
@@ -177,7 +173,6 @@ body {
   display: block;
 }
 
-/* NFT Info - Side Label Style */
 .nft-info {
   position: fixed;
   bottom: 2rem;
@@ -223,40 +218,42 @@ body {
   text-transform: uppercase;
 }
 
-/* Gallery Controls - Bottom Right */
-.gallery-controls {
+.nft-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   position: fixed;
   bottom: 2rem;
   right: 3rem;
-  display: flex;
-  gap: 0.5rem;
   z-index: 100;
 }
 
-.control-button {
-  width: 48px;
-  height: 48px;
-  background: transparent;
-  border: 1px solid var(--gray-dark);
-  color: var(--gray-light);
-  font-size: 16px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.chain-badge {
+  padding: 0.25rem 0.5rem;
+  background: #333;
+  color: #aaa;
+  font-size: 0.7rem;
+  border-radius: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
-.control-button:hover {
-  border-color: var(--white);
-  color: var(--white);
+.mode-badge {
+  padding: 0.25rem 0.5rem;
+  background: #333;
+  color: #aaa;
+  font-size: 0.7rem;
+  border-radius: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
-.control-button:active {
-  background: var(--gray-dark);
+.mode-badge.curated {
+  background: #4f4;
+  color: #000;
+  font-weight: bold;
 }
 
-/* Fullscreen Button */
 .fullscreen-toggle {
   position: fixed;
   top: 2rem;
@@ -291,7 +288,6 @@ body {
   font-size: 28px;
 }
 
-/* Footer - Minimal Bottom Bar */
 .gallery-footer {
   position: fixed;
   bottom: 0;
@@ -321,16 +317,6 @@ body {
   backdrop-filter: blur(10px);
 }
 
-.footer-meta {
-  display: none;
-}
-
-/* Progress Indicator - Hidden by default, can be added back */
-.gallery-progress {
-  display: none;
-}
-
-/* Modal Overlay - Dark background */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -348,7 +334,6 @@ body {
   to { opacity: 1; }
 }
 
-/* Collection Modal - Centered floating box */
 .collection-modal {
   position: fixed;
   top: 50%;
@@ -378,7 +363,6 @@ body {
   }
 }
 
-/* Close button */
 .modal-close {
   position: absolute;
   top: 1.5rem;
@@ -404,7 +388,6 @@ body {
   transform: rotate(90deg);
 }
 
-/* Modal Title - Bauhaus style */
 .modal-collection-title {
   font-family: 'Antonio', sans-serif;
   font-size: 2.5rem;
@@ -416,7 +399,6 @@ body {
   color: #000;
 }
 
-/* Modal Description */
 .modal-collection-description {
   font-family: 'Archivo', sans-serif;
   font-size: 1.1rem;
@@ -426,7 +408,6 @@ body {
   color: #1a1a1a;
 }
 
-/* Info Button - Minimized state (bottom right) */
 .collection-info-button {
   position: fixed;
   bottom: 6.5rem;
@@ -454,11 +435,10 @@ body {
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
 }
 
-/* Fullscreen Mode */
 .gallery.fullscreen .gallery-header,
 .gallery.fullscreen .gallery-footer,
-.gallery.fullscreen .gallery-controls,
 .gallery.fullscreen .nft-info,
+.gallery.fullscreen .nft-meta,
 .gallery.fullscreen .mode-toggle,
 .gallery.fullscreen .collection-info-button {
   opacity: 0;
@@ -476,7 +456,6 @@ body {
   padding: 2rem;
 }
 
-/* Loading State */
 .gallery-loading {
   display: flex;
   align-items: center;
@@ -494,7 +473,6 @@ body {
   color: var(--gray);
 }
 
-/* Empty State */
 .gallery-empty {
   position: fixed;
   top: 0;
@@ -542,7 +520,6 @@ body {
   padding: 2rem;
 }
 
-/* Responsive */
 @media (max-width: 768px) {
   .gallery-header {
     padding: 1.5rem 2rem;
@@ -561,11 +538,12 @@ body {
   .nft-hero {
     padding: 0 2rem;
     top: 5rem;
-    bottom: 5rem;
+    bottom: 2rem;
   }
 
   .nft-info {
     left: 2rem;
+    bottom: 1.5rem;
     max-width: calc(100% - 4rem);
   }
 
@@ -593,30 +571,26 @@ body {
   }
 
   .collection-info-button {
-    bottom: 5.5rem;
+    bottom: 1.5rem !important;
     right: 2rem;
     width: 44px;
     height: 44px;
     font-size: 1.3rem;
   }
 
-  /* MOBILE ONLY: Hide footer text */
   .gallery-footer {
-    display: none;
+    display: none !important;
   }
 
-  /* MOBILE ONLY: Hide the counter/badges line */
-  .nft-info > div:last-child {
+  .nft-meta {
     display: none !important;
   }
 }
 
-/* Accessibility */
 @media (prefers-reduced-motion: reduce) {
   .nft-hero,
   .nft-info,
   .nft-image,
-  .control-button,
   .fullscreen-toggle,
   .mode-button,
   .modal-overlay,
