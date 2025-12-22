@@ -14,8 +14,6 @@ function checkAuth(req) {
   return username === process.env.ADMIN_USERNAME && password === process.env.ADMIN_PASSWORD;
 }
 
-const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
 async function buildGalleryNFTs(keyword) {
   try {
     const searchResults = await alchemy.nft.searchContractMetadata(keyword);
@@ -63,11 +61,6 @@ async function buildGalleryNFTs(keyword) {
       } catch (err) {
         console.error(`Contract ${i} error:`, err.message);
         continue;
-      }
-      
-      // Delay every 10 contracts only
-      if (i % 10 === 0 && i > 0) {
-        await delay(100);
       }
       
       // Log progress every 50 contracts
