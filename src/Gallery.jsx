@@ -25,7 +25,7 @@ export default function Gallery() {
   async function fetchGallery() {
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE}/admin/collections/collections`);
+      const response = await fetch(`${API_BASE}/gallery?mode=${galleryMode}`);
       const data = await response.json();
       
       setNfts(data.nfts || []);
@@ -53,7 +53,7 @@ export default function Gallery() {
 
   async function fetchCollectionInfo() {
     try {
-      const response = await fetch(`${API_BASE}/admin/collections/collections`);
+      const response = await fetch(`${API_BASE}/collections`);
       const collections = await response.json();
       const activeCollection = collections.find(c => c.is_active);
       if (activeCollection) {
