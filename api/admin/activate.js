@@ -40,7 +40,7 @@ async function buildGalleryNFTs(keyword) {
       
       try {
         const nftsForContract = await alchemy.nft.getNftsForContract(contract.address, {
-          pageSize: 5
+          pageSize: 1
         });
 
         for (const nft of nftsForContract.nfts || []) {
