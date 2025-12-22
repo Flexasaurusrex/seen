@@ -7,7 +7,6 @@ function Admin() {
   const [auth, setAuth] = useState({ username: '', password: '' });
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [keywords, setKeywords] = useState([]);
-  const [settings, setSettings] = useState({ max_nfts: 50, max_contracts: 500 });
   const [newKeyword, setNewKeyword] = useState('');
   const [message, setMessage] = useState({ text: '', type: '' });
   const [loading, setLoading] = useState(false);
@@ -28,7 +27,7 @@ function Admin() {
       const res = await fetch(`${API_BASE}/api/admin/keywords`, { headers: authHeaders() });
       if (res.ok) {
         setIsAuthenticated(true);
-        loadData();
+        loadKeywords();
       } else {
         showMessage('Invalid credentials', 'error');
       }
@@ -37,21 +36,12 @@ function Admin() {
     }
   };
 
-  const loadData = async () => {
+  const loadKeywords = async () => {
     try {
-      const [kwRes, setRes] = await Promise.all([
-        fetch(`${API_BASE}/api/admin/keywords`, { headers: authHeaders() }),
-        fetch(`${API_BASE}/api/admin/settings`, { headers: authHeaders() })
-      ]);
-
-      if (kwRes.ok) {
-        const data = await kwRes.json();
+      const res = await fetch(`${API_BASE}/api/admin/keywords`, { headers: authHeaders() });
+      if (res.ok) {
+        const data = await res.json();
         setKeywords(data);
-      }
-
-      if (setRes.ok) {
-        const data = await setRes.json();
-        setSettings(data);
       }
     } catch (err) {
       console.error('Load error:', err);
@@ -73,10 +63,9 @@ function Admin() {
       if (res.ok) {
         setNewKeyword('');
         showMessage('Keyword added');
-        loadData();
+        loadKeywords();
       } else {
-        const data = await res.json();
-        showMessage(data.error || 'Failed to add', 'error');
+        showMessage('Failed to add', 'error');
       }
     } catch (err) {
       showMessage('Failed to add', 'error');
@@ -85,7 +74,7 @@ function Admin() {
   };
 
   const deleteKeyword = async (id, keyword) => {
-    if (!confirm(`Delete "${keyword}"? This removes all its NFTs.`)) return;
+    if (!confirm(`Delete "${keyword}"?`)) return;
 
     setLoading(true);
     try {
@@ -95,8 +84,8 @@ function Admin() {
       });
 
       if (res.ok) {
-        showMessage('Keyword deleted');
-        loadData();
+        showMessage('Deleted');
+        loadKeywords();
       } else {
         showMessage('Failed to delete', 'error');
       }
@@ -108,7 +97,7 @@ function Admin() {
 
   const activateKeyword = async (id, keyword) => {
     setLoading(true);
-    showMessage(`Activating "${keyword}"... fetching NFTs...`, 'info');
+    showMessage(`Activating "${keyword}"...`, 'info');
 
     try {
       const res = await fetch(`${API_BASE}/api/admin/activate`, {
@@ -119,11 +108,10 @@ function Admin() {
 
       if (res.ok) {
         const data = await res.json();
-        showMessage(`Activated! Fetched ${data.nftCount} NFTs`);
-        loadData();
+        showMessage(`Activated! ${data.nftCount} NFTs fetched`);
+        loadKeywords();
       } else {
-        const data = await res.json();
-        showMessage(data.error || 'Activation failed', 'error');
+        showMessage('Activation failed', 'error');
       }
     } catch (err) {
       showMessage('Activation failed', 'error');
@@ -131,24 +119,6 @@ function Admin() {
     setLoading(false);
   };
 
-  const updateSetting = async (key, value) => {
-    try {
-      const res = await fetch(`${API_BASE}/api/admin/settings`, {
-        method: 'PUT',
-        headers: authHeaders(),
-        body: JSON.stringify({ [key]: value })
-      });
-
-      if (res.ok) {
-        setSettings({ ...settings, [key]: value });
-        showMessage('Setting updated');
-      }
-    } catch (err) {
-      showMessage('Failed to update', 'error');
-    }
-  };
-
-  // Login screen
   if (!isAuthenticated) {
     return (
       <div style={{ 
@@ -213,7 +183,6 @@ function Admin() {
 
   const activeKeyword = keywords.find(k => k.is_active);
 
-  // Admin panel
   return (
     <div style={{
       minHeight: '100vh',
@@ -254,7 +223,6 @@ function Admin() {
         </div>
       )}
 
-      {/* Active keyword info */}
       {activeKeyword && (
         <div style={{ 
           padding: '1.5rem', 
@@ -263,15 +231,13 @@ function Admin() {
           border: '1px solid #333'
         }}>
           <div style={{ marginBottom: '0.5rem', color: '#888' }}>CURRENTLY ACTIVE:</div>
-          <div style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>{activeKeyword.keyword}</div>
-          <div style={{ display: 'flex', gap: '2rem', fontSize: '0.9rem', color: '#aaa' }}>
-            <div>Max NFTs: {settings.max_nfts || 50}</div>
-            <div>Max Contracts: {settings.max_contracts || 500}</div>
+          <div style={{ fontSize: '1.5rem' }}>{activeKeyword.keyword}</div>
+          <div style={{ marginTop: '0.5rem', color: '#666', fontSize: '0.9rem' }}>
+            Fetches 200 NFTs from 500 contracts
           </div>
         </div>
       )}
 
-      {/* Add keyword */}
       <section style={{ marginBottom: '3rem' }}>
         <h2 style={{ marginBottom: '1rem' }}>ADD KEYWORD</h2>
         <form onSubmit={addKeyword} style={{ display: 'flex', gap: '1rem' }}>
@@ -307,12 +273,11 @@ function Admin() {
         </form>
       </section>
 
-      {/* Keywords list */}
-      <section style={{ marginBottom: '3rem' }}>
+      <section>
         <h2 style={{ marginBottom: '1rem' }}>KEYWORDS ({keywords.length})</h2>
         {keywords.length === 0 ? (
           <div style={{ color: '#666', padding: '2rem', textAlign: 'center' }}>
-            No keywords yet. Add one above.
+            No keywords yet
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
@@ -376,59 +341,6 @@ function Admin() {
             ))}
           </div>
         )}
-      </section>
-
-      {/* Settings */}
-      <section>
-        <h2 style={{ marginBottom: '1rem' }}>SETTINGS</h2>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-              <label>Max NFTs to Display</label>
-              <span style={{ color: '#4f4' }}>{settings.max_nfts || 50}</span>
-            </div>
-            <input
-              type="range"
-              min="10"
-              max="200"
-              step="10"
-              value={settings.max_nfts || 50}
-              onChange={(e) => updateSetting('max_nfts', e.target.value)}
-              style={{ width: '100%' }}
-            />
-          </div>
-
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-              <label>Max Contracts to Search</label>
-              <span style={{ color: '#4f4' }}>{settings.max_contracts || 500}</span>
-            </div>
-            <input
-              type="range"
-              min="10"
-              max="500"
-              step="10"
-              value={settings.max_contracts || 500}
-              onChange={(e) => updateSetting('max_contracts', e.target.value)}
-              style={{ width: '100%' }}
-            />
-          </div>
-
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-              <label>Auto-Rotation Hours</label>
-              <span style={{ color: '#4f4' }}>{settings.rotation_hours || 24}h</span>
-            </div>
-            <input
-              type="range"
-              min="1"
-              max="168"
-              value={settings.rotation_hours || 24}
-              onChange={(e) => updateSetting('rotation_hours', e.target.value)}
-              style={{ width: '100%' }}
-            />
-          </div>
-        </div>
       </section>
     </div>
   );
