@@ -4,6 +4,13 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   
   try {
+    // Try to add chain column directly
+    try {
+      await sql`ALTER TABLE nft_cache ADD COLUMN chain VARCHAR(20)`;
+    } catch (e) {
+      console.log('Chain column might already exist or other error:', e.message);
+    }
+    
     await sql`
       CREATE TABLE IF NOT EXISTS keywords (
         id SERIAL PRIMARY KEY,
@@ -24,12 +31,10 @@ export default async function handler(req, res) {
         image_url TEXT,
         external_url TEXT,
         creator_name TEXT,
+        chain VARCHAR(20),
         cached_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `;
-    
-    // Add chain column if it doesn't exist
-    await sql`ALTER TABLE nft_cache ADD COLUMN IF NOT EXISTS chain VARCHAR(20)`;
     
     await sql`
       CREATE TABLE IF NOT EXISTS settings (
