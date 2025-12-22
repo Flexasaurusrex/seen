@@ -190,6 +190,11 @@ export default function Gallery() {
               src={currentNFT.image_url} 
               alt={currentNFT.title}
               className="nft-image"
+              onError={() => {
+                // If image fails to load, skip to next NFT
+                console.warn('Image failed to load, skipping to next');
+                goToNext();
+              }}
             />
           </div>
         </div>
