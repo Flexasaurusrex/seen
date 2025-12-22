@@ -13,7 +13,6 @@ export default function Gallery() {
   const [isPlaying, setIsPlaying] = useState(true);
   const [brokenImages, setBrokenImages] = useState(new Set());
 
-  // Fetch gallery data
   useEffect(() => {
     fetchGallery();
   }, []);
@@ -27,7 +26,6 @@ export default function Gallery() {
       setCurrentKeyword(data.keyword);
       setLoading(false);
       
-      // Track view
       if (data.nfts && data.nfts.length > 0) {
         trackView(data.nfts[0].id);
       }
@@ -37,31 +35,15 @@ export default function Gallery() {
     }
   }
 
-  // Auto-advance slideshow
   useEffect(() => {
     if (nfts.length === 0 || !isPlaying) return;
 
     const interval = setInterval(() => {
-      setFade(false);
-      
-      setTimeout(() => {
-        setCurrentIndex((prev) => {
-          const next = (prev + 1) % nfts.length;
-          if (nfts[next]) {
-            trackView(nfts[next].id);
-          }
-          return next;
-        });
-        
-        // Tiny delay before fading back in
-        setTimeout(() => {
-          setFade(true);
-        }, 50);
-      }, 400);
-    }, 8000); // Change every 8 seconds
+      goToNext();
+    }, 8000);
 
     return () => clearInterval(interval);
-  }, [nfts, isPlaying]);
+  }, [nfts, isPlaying, currentIndex, brokenImages]);
 
   async function trackView(nftId) {
     try {
@@ -96,9 +78,9 @@ export default function Gallery() {
 
   function goToNext() {
     setFade(false);
+    
     setTimeout(() => {
       setCurrentIndex((prev) => {
-        // Find next non-broken image
         let next = (prev + 1) % nfts.length;
         let attempts = 0;
         while (brokenImages.has(nfts[next]?.image_url) && attempts < nfts.length) {
@@ -119,9 +101,9 @@ export default function Gallery() {
 
   function goToPrevious() {
     setFade(false);
+    
     setTimeout(() => {
       setCurrentIndex((prev) => {
-        // Find previous non-broken image
         let next = (prev - 1 + nfts.length) % nfts.length;
         let attempts = 0;
         while (brokenImages.has(nfts[next]?.image_url) && attempts < nfts.length) {
@@ -172,15 +154,6 @@ export default function Gallery() {
           <div className="footer-manifesto">
             SEEN is an anti-marketplace that uses public infrastructure to display artists' work without fees, friction, or obligation—because art deserves to be seen, not sold to be visible.
           </div>
-          <div className="footer-meta">
-            <span>Visibility is not a transaction.</span>
-            <span className="footer-separator">·</span>
-            <span>SEEN does not take a cut.</span>
-            <span className="footer-separator">·</span>
-            <span>SEEN does not optimize engagement.</span>
-            <span className="footer-separator">·</span>
-            <span>SEEN does not ask artists for anything.</span>
-          </div>
         </footer>
       </div>
     );
@@ -210,7 +183,6 @@ export default function Gallery() {
               alt={currentNFT.title}
               className="nft-image"
               onError={() => {
-                // Mark this image as broken and skip to next
                 const imageUrl = currentNFT.image_url;
                 if (!brokenImages.has(imageUrl)) {
                   console.warn('Image failed to load:', imageUrl);
@@ -240,38 +212,17 @@ export default function Gallery() {
           </button>
         </div>
 
-        <div className="gallery-progress">
-          <div className="progress-text">
-            {String(currentIndex + 1).padStart(2, '0')} / {String(nfts.length).padStart(2, '0')}
-          </div>
-          <div className="progress-bar">
-            <div 
-              className="progress-fill" 
-              style={{ width: `${((currentIndex + 1) / nfts.length) * 100}%` }}
-            ></div>
-          </div>
-        </div>
-
         <button 
           className="fullscreen-toggle"
           onClick={() => setFullscreen(!fullscreen)}
           title={fullscreen ? 'Exit fullscreen' : 'Fullscreen'}
         >
-          {fullscreen ? '×' : ''}
+          {fullscreen ? '×' : '⛶'}
         </button>
 
         <footer className="gallery-footer">
           <div className="footer-manifesto">
             SEEN is an anti-marketplace that uses public infrastructure to display artists' work without fees, friction, or obligation—because art deserves to be seen, not sold to be visible.
-          </div>
-          <div className="footer-meta">
-            <span>Visibility is not a transaction.</span>
-            <span className="footer-separator">·</span>
-            <span>SEEN does not take a cut.</span>
-            <span className="footer-separator">·</span>
-            <span>SEEN does not optimize engagement.</span>
-            <span className="footer-separator">·</span>
-            <span>SEEN does not ask artists for anything.</span>
           </div>
         </footer>
       </div>
