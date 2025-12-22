@@ -12,10 +12,10 @@ function Admin() {
   const [message, setMessage] = useState({ text: '', type: '' });
   const [loading, setLoading] = useState(false);
 
-  const authHeaders = {
+  const authHeaders = () => ({
     'Authorization': 'Basic ' + btoa(`${auth.username}:${auth.password}`),
     'Content-Type': 'application/json'
-  };
+  });
 
   const showMessage = (text, type = 'success') => {
     setMessage({ text, type });
@@ -25,7 +25,7 @@ function Admin() {
   const login = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch(`${API_BASE}/api/admin/keywords`, { headers: authHeaders });
+      const res = await fetch(`${API_BASE}/api/admin/keywords`, { headers: authHeaders() });
       if (res.ok) {
         setIsAuthenticated(true);
         loadData();
@@ -40,8 +40,8 @@ function Admin() {
   const loadData = async () => {
     try {
       const [kwRes, setRes] = await Promise.all([
-        fetch(`${API_BASE}/api/admin/keywords`, { headers: authHeaders }),
-        fetch(`${API_BASE}/api/admin/settings`, { headers: authHeaders })
+        fetch(`${API_BASE}/api/admin/keywords`, { headers: authHeaders() }),
+        fetch(`${API_BASE}/api/admin/settings`, { headers: authHeaders() })
       ]);
 
       if (kwRes.ok) {
@@ -66,7 +66,7 @@ function Admin() {
     try {
       const res = await fetch(`${API_BASE}/api/admin/keywords`, {
         method: 'POST',
-        headers: authHeaders,
+        headers: authHeaders(),
         body: JSON.stringify({ keyword: newKeyword.trim() })
       });
 
@@ -89,9 +89,9 @@ function Admin() {
 
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/admin/keywords/${id}`, {
+      const res = await fetch(`${API_BASE}/api/admin/keywords?id=${id}`, {
         method: 'DELETE',
-        headers: authHeaders
+        headers: authHeaders()
       });
 
       if (res.ok) {
@@ -113,7 +113,7 @@ function Admin() {
     try {
       const res = await fetch(`${API_BASE}/api/admin/activate`, {
         method: 'POST',
-        headers: authHeaders,
+        headers: authHeaders(),
         body: JSON.stringify({ id })
       });
 
@@ -135,7 +135,7 @@ function Admin() {
     try {
       const res = await fetch(`${API_BASE}/api/admin/settings`, {
         method: 'PUT',
-        headers: authHeaders,
+        headers: authHeaders(),
         body: JSON.stringify({ [key]: value })
       });
 
