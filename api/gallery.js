@@ -9,26 +9,24 @@ export default async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
-    const activeKeyword = await sql`SELECT * FROM keywords WHERE is_active = true LIMIT 1`;
+    // Get all active keywords
+    const activeKeywords = await sql`SELECT * FROM keywords WHERE is_active = true`;
     
-    if (activeKeyword.rows.length === 0) {
-      return res.json({ keyword: 'none', nfts: [] });
+    if (activeKeywords.rows.length === 0) {
+      return res.json({ nfts: [], keywords: [] });
     }
 
-    const nfts = await sql`SELECT * FROM nft_cache WHERE keyword_id = ${activeKeyword.rows[0].id} ORDER BY RANDOM()`;
+    // Get NFTs from all active keywords
+    const keywordIds = activeKeywords.rows.map(k => k.id);
+    const nfts = await sql`
+      SELECT * FROM nft_cache 
+      WHERE keyword_id = ANY(${keywordIds})
+      ORDER BY RANDOM()
+    `;
 
-    return res.json({
-      keyword: activeKeyword.rows[0].keyword,
-      nfts: nfts.rows.map(nft => ({
-        id: nft.id,
-        contract_address: nft.contract_address,
-        token_id: nft.token_id,
-        title: nft.title,
-        description: nft.description,
-        image_url: nft.image_url,
-        external_url: nft.external_url,
-        creator_name: nft.creator_name
-      }))
+    return res.json({ 
+      nfts: nfts.rows,
+      keywords: activeKeywords.rows.map(k => k.keyword).join(', ')
     });
   } catch (error) {
     console.error('Gallery error:', error);
