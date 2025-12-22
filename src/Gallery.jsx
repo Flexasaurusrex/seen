@@ -25,7 +25,7 @@ export default function Gallery() {
   async function fetchGallery() {
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE}/gallery?mode=${galleryMode}`);
+      const response = await fetch(`${API_BASE}/admin/collections/collections`);
       const data = await response.json();
       
       setNfts(data.nfts || []);
