@@ -91,12 +91,11 @@ body {
   color: var(--gray-light);
 }
 
-/* Mode Toggle */
+/* Mode Toggle - In Header */
 .mode-toggle {
-  position: absolute;
-  top: 6rem;
-  left: 50%;
-  transform: translateX(-50%);
+  position: fixed;
+  top: 2rem;
+  right: 12rem;
   display: flex;
   gap: 0;
   background: #000;
@@ -545,7 +544,8 @@ body {
   }
 
   .mode-toggle {
-    top: 5rem;
+    top: 1.5rem;
+    right: 6rem;
   }
 
   .mode-button {
