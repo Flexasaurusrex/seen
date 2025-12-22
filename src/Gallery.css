@@ -193,6 +193,52 @@ body {
   text-transform: uppercase;
 }
 
+.nft-counter {
+  font-family: 'Antonio', sans-serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  color: var(--gray);
+  margin-top: 0.75rem;
+  text-transform: uppercase;
+}
+
+/* Gallery Controls */
+.gallery-controls {
+  position: fixed;
+  bottom: 14rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0.75rem;
+  z-index: 100;
+}
+
+.control-button {
+  width: 40px;
+  height: 40px;
+  background: rgba(0, 0, 0, 0.8);
+  border: 1px solid var(--gray);
+  border-radius: 4px;
+  color: var(--white);
+  font-size: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.control-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--white);
+  transform: scale(1.05);
+}
+
+.control-button:active {
+  transform: scale(0.95);
+}
+
 /* Progress Indicator */
 .gallery-progress {
   position: fixed;
@@ -322,6 +368,7 @@ body {
 .gallery.fullscreen .gallery-header,
 .gallery.fullscreen .gallery-progress,
 .gallery.fullscreen .gallery-footer,
+.gallery.fullscreen .gallery-controls,
 .gallery.fullscreen .nft-info {
   opacity: 0;
   pointer-events: none;
