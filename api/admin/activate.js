@@ -14,11 +14,10 @@ function checkAuth(req) {
   return username === process.env.ADMIN_USERNAME && password === process.env.ADMIN_PASSWORD;
 }
 
-async function buildGalleryNFTs(keyword, maxNfts = 50) {
+async function buildGalleryNFTs(keyword, maxNfts = 50, maxContracts = 500) {
   try {
     const searchResults = await alchemy.nft.searchContractMetadata(keyword);
     
-    // searchResults might be an object with .contracts array
     const contracts = Array.isArray(searchResults) ? searchResults : (searchResults.contracts || []);
     
     if (contracts.length === 0) {
@@ -26,11 +25,13 @@ async function buildGalleryNFTs(keyword, maxNfts = 50) {
     }
     
     const nfts = [];
+    const contractsToSearch = Math.min(contracts.length, maxContracts);
+    const nftsPerContract = Math.max(1, Math.ceil(maxNfts / contractsToSearch));
     
-    for (const contract of contracts.slice(0, 10)) {
+    for (const contract of contracts.slice(0, contractsToSearch)) {
       try {
         const nftsForContract = await alchemy.nft.getNftsForContract(contract.address, {
-          pageSize: Math.ceil(maxNfts / 10)
+          pageSize: nftsPerContract
         });
 
         for (const nft of nftsForContract.nfts || []) {
@@ -90,8 +91,9 @@ export default async function handler(req, res) {
 
     const settings = await sql`SELECT * FROM settings`;
     const maxNfts = parseInt(settings.rows.find(s => s.key === 'max_nfts')?.value || '50');
+    const maxContracts = parseInt(settings.rows.find(s => s.key === 'max_contracts')?.value || '500');
     
-    const nfts = await buildGalleryNFTs(keyword.rows[0].keyword, maxNfts);
+    const nfts = await buildGalleryNFTs(keyword.rows[0].keyword, maxNfts, maxContracts);
     
     await sql`DELETE FROM nft_cache WHERE keyword_id = ${id}`;
     
