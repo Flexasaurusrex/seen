@@ -77,6 +77,11 @@ body {
   text-transform: uppercase;
   color: var(--white);
   line-height: 1;
+  text-shadow: 
+    0 0 10px rgba(255, 255, 255, 0.3),
+    0 0 20px rgba(255, 255, 255, 0.2),
+    0 0 30px rgba(255, 255, 255, 0.1);
+  animation: crt-glow 3s ease-in-out infinite;
 }
 
 .gallery-tagline {
@@ -86,6 +91,10 @@ body {
   letter-spacing: 0.05em;
   color: var(--gray-light);
   margin-top: 0.5rem;
+  text-shadow: 
+    0 0 8px rgba(128, 128, 128, 0.3),
+    0 0 15px rgba(128, 128, 128, 0.2);
+  animation: crt-glow 3s ease-in-out infinite 0.5s;
 }
 
 /* NFT Hero */
@@ -220,6 +229,10 @@ body {
   max-width: 900px;
   margin: 0 auto 2rem;
   text-align: center;
+  text-shadow: 
+    0 0 8px rgba(128, 128, 128, 0.3),
+    0 0 15px rgba(128, 128, 128, 0.2);
+  animation: crt-glow 3s ease-in-out infinite 1s;
 }
 
 .footer-meta {
@@ -233,6 +246,10 @@ body {
   flex-wrap: wrap;
   justify-content: center;
   gap: 0 0.75rem;
+  text-shadow: 
+    0 0 6px rgba(64, 64, 64, 0.4),
+    0 0 12px rgba(64, 64, 64, 0.2);
+  animation: crt-glow 3s ease-in-out infinite 1.5s;
 }
 
 .footer-separator {
@@ -384,6 +401,21 @@ body {
 @keyframes pulse {
   0%, 100% { opacity: 0.2; }
   50% { opacity: 1; }
+}
+
+@keyframes crt-glow {
+  0%, 100% {
+    text-shadow: 
+      0 0 10px rgba(255, 255, 255, 0.2),
+      0 0 20px rgba(255, 255, 255, 0.15),
+      0 0 30px rgba(255, 255, 255, 0.1);
+  }
+  50% {
+    text-shadow: 
+      0 0 15px rgba(255, 255, 255, 0.4),
+      0 0 30px rgba(255, 255, 255, 0.3),
+      0 0 45px rgba(255, 255, 255, 0.2);
+  }
 }
 
 /* Responsive */
