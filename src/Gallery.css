@@ -33,7 +33,6 @@ body {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
 }
 
 .gallery-bg {
@@ -55,7 +54,7 @@ body {
   flex-direction: column;
 }
 
-/* Header - Compact */
+/* Header - Minimal Top Bar */
 .gallery-header {
   position: fixed;
   top: 0;
@@ -63,56 +62,48 @@ body {
   width: 100%;
   padding: 2rem 3rem;
   display: flex;
-  justify-content: flex-start;
+  justify-content: space-between;
   align-items: center;
   z-index: 100;
-  background: linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, transparent 100%);
 }
 
 .header-left {
   display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
+  align-items: baseline;
+  gap: 1rem;
 }
 
 .gallery-title {
   font-family: 'Antonio', sans-serif;
-  font-size: clamp(2rem, 4vw, 3rem);
+  font-size: 1.5rem;
   font-weight: 700;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.3em;
   text-transform: uppercase;
   color: var(--white);
   line-height: 1;
-  text-shadow: 
-    0 0 10px rgba(255, 255, 255, 0.3),
-    0 0 20px rgba(255, 255, 255, 0.2);
-  animation: crt-glow 3s ease-in-out infinite;
 }
 
 .gallery-tagline {
   font-family: 'Archivo', sans-serif;
-  font-size: clamp(0.75rem, 1.2vw, 0.95rem);
+  font-size: 0.75rem;
   font-weight: 300;
   letter-spacing: 0.05em;
   color: var(--gray-light);
-  text-shadow: 
-    0 0 8px rgba(128, 128, 128, 0.3);
-  animation: crt-glow 3s ease-in-out infinite 0.5s;
 }
 
-/* Hero Section - Main Gallery */
+/* Hero Section - Art is King */
 .nft-hero {
   position: fixed;
-  top: 8rem;
+  top: 6rem;
   left: 0;
   right: 0;
-  bottom: 24rem;
+  bottom: 6rem;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-  padding: 0 3rem;
+  padding: 0 4rem;
 }
 
 .nft-hero.fade-in {
@@ -126,39 +117,31 @@ body {
 .nft-image-container {
   position: relative;
   width: 100%;
-  max-width: 1400px;
-  max-height: 100%;
+  height: 100%;
+  max-width: 1600px;
   margin: 0 auto;
-  overflow: hidden;
-  background: var(--black-soft);
-  border: 1px solid var(--gray);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .nft-image {
-  width: 100%;
-  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
   object-fit: contain;
   display: block;
-  transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.nft-hero:hover .nft-image {
-  transform: scale(1.01);
-}
-
-/* NFT Info - Dedicated Space Below Image */
+/* NFT Info - Side Label Style */
 .nft-info {
   position: fixed;
-  bottom: 18rem;
-  left: 50%;
-  transform: translateX(-50%);
-  text-align: center;
+  bottom: 2rem;
+  left: 3rem;
   transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 90;
-  max-width: 60%;
+  max-width: 400px;
 }
 
 .nft-info.fade-in {
@@ -171,122 +154,79 @@ body {
 
 .nft-title {
   font-family: 'Antonio', sans-serif;
-  font-size: clamp(1.25rem, 3vw, 2rem);
+  font-size: 1.25rem;
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.25rem;
   line-height: 1.2;
   color: var(--white);
 }
 
 .nft-creator {
   font-family: 'Archivo', sans-serif;
-  font-size: clamp(0.85rem, 1.2vw, 1rem);
+  font-size: 0.85rem;
   font-weight: 400;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.05em;
   color: var(--gray-light);
-  text-transform: uppercase;
+  margin-bottom: 0.5rem;
 }
 
 .nft-counter {
-  font-family: 'Antonio', sans-serif;
-  font-size: 0.75rem;
-  letter-spacing: 0.2em;
+  font-family: 'Archivo', sans-serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
   color: var(--gray);
-  margin-top: 0.75rem;
   text-transform: uppercase;
 }
 
-/* Gallery Controls */
+/* Gallery Controls - Bottom Right */
 .gallery-controls {
   position: fixed;
-  bottom: 16rem;
-  left: 50%;
-  transform: translateX(-50%);
+  bottom: 2rem;
+  right: 3rem;
   display: flex;
-  gap: 1rem;
+  gap: 0.5rem;
   z-index: 100;
 }
 
 .control-button {
-  width: 44px;
-  height: 44px;
-  background: rgba(0, 0, 0, 0.9);
-  border: 1px solid var(--gray);
-  border-radius: 4px;
-  color: var(--white);
-  font-size: 18px;
+  width: 48px;
+  height: 48px;
+  background: transparent;
+  border: 1px solid var(--gray-dark);
+  color: var(--gray-light);
+  font-size: 16px;
   cursor: pointer;
   transition: all 0.2s ease;
-  backdrop-filter: blur(10px);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .control-button:hover {
-  background: rgba(255, 255, 255, 0.15);
   border-color: var(--white);
+  color: var(--white);
 }
 
 .control-button:active {
-  transform: scale(0.95);
-}
-
-/* Progress Indicator */
-.gallery-progress {
-  position: fixed;
-  bottom: 8rem;
-  left: 50%;
-  transform: translateX(-50%);
-  width: calc(100% - 6rem);
-  max-width: 400px;
-  z-index: 100;
-}
-
-.progress-text {
-  font-family: 'Antonio', sans-serif;
-  font-size: 0.75rem;
-  letter-spacing: 0.2em;
-  color: var(--gray);
-  margin-bottom: 0.5rem;
-  text-align: center;
-}
-
-.progress-bar {
-  width: 100%;
-  height: 1px;
   background: var(--gray-dark);
-  position: relative;
-  overflow: hidden;
 }
 
-.progress-fill {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 100%;
-  background: var(--white);
-  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Fullscreen Button - Professional */
+/* Fullscreen Button */
 .fullscreen-toggle {
   position: fixed;
-  bottom: 2rem;
+  top: 2rem;
   right: 3rem;
   width: 48px;
   height: 48px;
-  background: rgba(0, 0, 0, 0.8);
-  border: 1px solid var(--gray);
-  border-radius: 4px;
-  color: var(--white);
+  background: transparent;
+  border: 1px solid var(--gray-dark);
+  color: var(--gray-light);
   padding: 0;
   cursor: pointer;
   z-index: 101;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
+  transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -294,74 +234,55 @@ body {
 }
 
 .fullscreen-toggle:hover {
-  background: rgba(255, 255, 255, 0.1);
   border-color: var(--white);
-  transform: scale(1.05);
+  color: var(--white);
 }
 
 .fullscreen-toggle::before {
   content: '⛶';
-  font-size: 24px;
+  font-size: 20px;
 }
 
 .gallery.fullscreen .fullscreen-toggle::before {
   content: '×';
-  font-size: 32px;
+  font-size: 28px;
 }
 
-/* Footer - Clean Separation */
+/* Footer - Minimal Bottom Bar */
 .gallery-footer {
   position: fixed;
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 9rem;
-  padding: 1.5rem 3rem;
+  padding: 2rem 3rem;
   z-index: 100;
-  background: rgba(0, 0, 0, 0.95);
-  border-top: 1px solid var(--gray-dark);
   display: flex;
-  flex-direction: column;
   justify-content: center;
+  align-items: center;
 }
 
 .footer-manifesto {
   font-family: 'Archivo', sans-serif;
-  font-size: clamp(0.7rem, 1vw, 0.85rem);
+  font-size: 0.7rem;
   font-weight: 300;
-  line-height: 1.6;
-  color: var(--gray-light);
-  max-width: 900px;
-  margin: 0 auto 0.75rem;
+  line-height: 1.4;
+  color: var(--gray);
+  max-width: 800px;
   text-align: center;
-  text-shadow: 
-    0 0 8px rgba(128, 128, 128, 0.3);
-  animation: crt-glow 3s ease-in-out infinite 1s;
+  letter-spacing: 0.02em;
 }
 
 .footer-meta {
-  font-family: 'Archivo', sans-serif;
-  font-size: 0.65rem;
-  font-weight: 300;
-  letter-spacing: 0.05em;
-  color: var(--gray);
-  text-align: center;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0 0.75rem;
-  text-shadow: 
-    0 0 6px rgba(64, 64, 64, 0.4);
-  animation: crt-glow 3s ease-in-out infinite 1.5s;
+  display: none;
 }
 
-.footer-separator {
-  color: var(--gray-dark);
+/* Progress Indicator - Hidden by default, can be added back */
+.gallery-progress {
+  display: none;
 }
 
 /* Fullscreen Mode */
 .gallery.fullscreen .gallery-header,
-.gallery.fullscreen .gallery-progress,
 .gallery.fullscreen .gallery-footer,
 .gallery.fullscreen .gallery-controls,
 .gallery.fullscreen .nft-info {
@@ -370,22 +291,14 @@ body {
   transition: opacity 0.3s ease;
 }
 
-.gallery.fullscreen:hover .gallery-header,
-.gallery.fullscreen:hover .gallery-footer,
 .gallery.fullscreen:hover .fullscreen-toggle {
   opacity: 1;
-  pointer-events: all;
 }
 
 .gallery.fullscreen .nft-hero {
-  padding: 0;
-  height: 100vh;
-}
-
-.gallery.fullscreen .nft-image-container {
-  max-width: 95vw;
-  max-height: 95vh;
-  border: none;
+  top: 0;
+  bottom: 0;
+  padding: 2rem;
 }
 
 /* Loading State */
@@ -399,12 +312,11 @@ body {
 
 .loading-text {
   font-family: 'Antonio', sans-serif;
-  font-size: clamp(2rem, 6vw, 5rem);
+  font-size: 2rem;
   font-weight: 700;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.3em;
   text-transform: uppercase;
-  color: var(--white);
-  animation: pulse 2s infinite;
+  color: var(--gray);
 }
 
 /* Empty State */
@@ -416,7 +328,6 @@ body {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
 }
 
 .gallery-empty .gallery-content {
@@ -424,7 +335,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 8rem 3rem 12rem;
+  padding: 8rem 3rem;
 }
 
 .empty-container {
@@ -439,8 +350,7 @@ body {
   width: 100%;
   max-width: 700px;
   aspect-ratio: 16 / 10;
-  background: var(--black-soft);
-  border: 1px solid var(--gray);
+  border: 1px solid var(--gray-dark);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -448,57 +358,38 @@ body {
 
 .empty-text {
   font-family: 'Antonio', sans-serif;
-  font-size: clamp(1.25rem, 3vw, 2rem);
+  font-size: 1.5rem;
   font-weight: 700;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--gray);
-  animation: pulse 2s infinite;
+  color: var(--gray-dark);
   text-align: center;
   padding: 2rem;
 }
 
-/* Animations */
-@keyframes pulse {
-  0%, 100% { opacity: 0.3; }
-  50% { opacity: 1; }
-}
-
-@keyframes crt-glow {
-  0%, 100% {
-    text-shadow: 
-      0 0 10px rgba(255, 255, 255, 0.2),
-      0 0 20px rgba(255, 255, 255, 0.15);
-  }
-  50% {
-    text-shadow: 
-      0 0 15px rgba(255, 255, 255, 0.4),
-      0 0 30px rgba(255, 255, 255, 0.3);
-  }
-}
-
 /* Responsive */
 @media (max-width: 768px) {
-  .gallery-header {
+  .gallery-header,
+  .gallery-footer {
     padding: 1.5rem 2rem;
   }
 
   .nft-hero {
-    padding: 6rem 2rem 12rem;
+    padding: 0 2rem;
   }
 
-  .footer-meta {
-    flex-direction: column;
-    gap: 0.5rem;
+  .nft-info {
+    left: 2rem;
+    max-width: calc(100% - 10rem);
   }
 
-  .footer-separator {
-    display: none;
-  }
-
-  .fullscreen-toggle {
+  .gallery-controls {
     right: 2rem;
     bottom: 1.5rem;
+  }
+
+  .footer-manifesto {
+    font-size: 0.65rem;
   }
 }
 
@@ -507,21 +398,13 @@ body {
   .nft-hero,
   .nft-info,
   .nft-image,
-  .progress-fill,
+  .control-button,
   .fullscreen-toggle {
     transition: none;
   }
   
   .loading-text,
   .empty-text {
-    animation: none;
-    opacity: 1;
-  }
-  
-  .gallery-title,
-  .gallery-tagline,
-  .footer-manifesto,
-  .footer-meta {
     animation: none;
   }
 }
