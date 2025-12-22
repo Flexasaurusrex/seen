@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { flushSync } from 'react-dom';
 import './Gallery.css';
 
 const API_BASE = '/api';
@@ -81,50 +80,46 @@ export default function Gallery() {
     setFade(false);
     
     setTimeout(() => {
-      flushSync(() => {
-        setCurrentIndex((prev) => {
-          let next = (prev + 1) % nfts.length;
-          let attempts = 0;
-          while (brokenImages.has(nfts[next]?.image_url) && attempts < nfts.length) {
-            next = (next + 1) % nfts.length;
-            attempts++;
-          }
-          if (nfts[next]) {
-            trackView(nfts[next].id);
-          }
-          return next;
-        });
+      setCurrentIndex((prev) => {
+        let next = (prev + 1) % nfts.length;
+        let attempts = 0;
+        while (brokenImages.has(nfts[next]?.image_url) && attempts < nfts.length) {
+          next = (next + 1) % nfts.length;
+          attempts++;
+        }
+        if (nfts[next]) {
+          trackView(nfts[next].id);
+        }
+        return next;
       });
       
       setTimeout(() => {
         setFade(true);
       }, 50);
-    }, 400);
+    }, 450);
   }
 
   function goToPrevious() {
     setFade(false);
     
     setTimeout(() => {
-      flushSync(() => {
-        setCurrentIndex((prev) => {
-          let next = (prev - 1 + nfts.length) % nfts.length;
-          let attempts = 0;
-          while (brokenImages.has(nfts[next]?.image_url) && attempts < nfts.length) {
-            next = (next - 1 + nfts.length) % nfts.length;
-            attempts++;
-          }
-          if (nfts[next]) {
-            trackView(nfts[next].id);
-          }
-          return next;
-        });
+      setCurrentIndex((prev) => {
+        let next = (prev - 1 + nfts.length) % nfts.length;
+        let attempts = 0;
+        while (brokenImages.has(nfts[next]?.image_url) && attempts < nfts.length) {
+          next = (next - 1 + nfts.length) % nfts.length;
+          attempts++;
+        }
+        if (nfts[next]) {
+          trackView(nfts[next].id);
+        }
+        return next;
       });
       
       setTimeout(() => {
         setFade(true);
       }, 50);
-    }, 400);
+    }, 450);
   }
 
   if (loading) {
