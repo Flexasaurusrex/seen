@@ -12,18 +12,21 @@ export default function Gallery() {
   const [fullscreen, setFullscreen] = useState(false);
   const [isPlaying, setIsPlaying] = useState(true);
   const [brokenImages, setBrokenImages] = useState(new Set());
+  const [galleryMode, setGalleryMode] = useState('random'); // NEW: 'random' or 'curated'
 
   useEffect(() => {
     fetchGallery();
-  }, []);
+  }, [galleryMode]); // NEW: Re-fetch when mode changes
 
   async function fetchGallery() {
+    setLoading(true);
     try {
-      const response = await fetch(`${API_BASE}/gallery`);
+      const response = await fetch(`${API_BASE}/gallery?mode=${galleryMode}`);
       const data = await response.json();
       
       setNfts(data.nfts || []);
-      setCurrentKeyword(data.keyword);
+      setCurrentKeyword(data.keywords || data.collections || '');
+      setCurrentIndex(0); // Reset to first NFT when switching modes
       setLoading(false);
       
       if (data.nfts && data.nfts.length > 0) {
@@ -77,7 +80,6 @@ export default function Gallery() {
   }
 
   function goToNext() {
-    // Calculate next index first
     let nextIndex = (currentIndex + 1) % nfts.length;
     let attempts = 0;
     while (brokenImages.has(nfts[nextIndex]?.image_url) && attempts < nfts.length) {
@@ -85,12 +87,10 @@ export default function Gallery() {
       attempts++;
     }
     
-    // Preload next image
     const nextImage = new Image();
     nextImage.src = nfts[nextIndex]?.image_url;
     
     nextImage.onload = () => {
-      // Now start transition
       setFade(false);
       
       setTimeout(() => {
@@ -105,7 +105,6 @@ export default function Gallery() {
       }, 400);
     };
     
-    // If image fails to load or takes too long, proceed anyway
     setTimeout(() => {
       if (!nextImage.complete) {
         nextImage.onload = null;
@@ -122,7 +121,6 @@ export default function Gallery() {
   }
 
   function goToPrevious() {
-    // Calculate previous index first
     let prevIndex = (currentIndex - 1 + nfts.length) % nfts.length;
     let attempts = 0;
     while (brokenImages.has(nfts[prevIndex]?.image_url) && attempts < nfts.length) {
@@ -130,12 +128,10 @@ export default function Gallery() {
       attempts++;
     }
     
-    // Preload previous image
     const prevImage = new Image();
     prevImage.src = nfts[prevIndex]?.image_url;
     
     prevImage.onload = () => {
-      // Now start transition
       setFade(false);
       
       setTimeout(() => {
@@ -150,7 +146,6 @@ export default function Gallery() {
       }, 400);
     };
     
-    // If image fails to load or takes too long, proceed anyway
     setTimeout(() => {
       if (!prevImage.complete) {
         prevImage.onload = null;
@@ -186,10 +181,31 @@ export default function Gallery() {
           </div>
         </header>
 
+        {/* NEW: Mode toggle even when empty */}
+        <div className="mode-toggle">
+          <button 
+            className={`mode-button ${galleryMode === 'random' ? 'active' : ''}`}
+            onClick={() => setGalleryMode('random')}
+          >
+            RANDOM
+          </button>
+          <button 
+            className={`mode-button ${galleryMode === 'curated' ? 'active' : ''}`}
+            onClick={() => setGalleryMode('curated')}
+          >
+            CURATED
+          </button>
+        </div>
+
         <div className="gallery-content">
           <div className="empty-container">
             <div className="empty-box">
-              <div className="empty-text">NO ARTWORK AVAILABLE</div>
+              <div className="empty-text">
+                {galleryMode === 'curated' 
+                  ? 'NO CURATED COLLECTIONS ACTIVE' 
+                  : 'NO ARTWORK AVAILABLE'
+                }
+              </div>
             </div>
           </div>
         </div>
@@ -216,6 +232,24 @@ export default function Gallery() {
             <p className="gallery-tagline">Because being seen is enough.</p>
           </div>
         </header>
+
+        {/* NEW: Mode toggle button */}
+        <div className="mode-toggle">
+          <button 
+            className={`mode-button ${galleryMode === 'random' ? 'active' : ''}`}
+            onClick={() => setGalleryMode('random')}
+            title="Algorithmically discovered NFTs"
+          >
+            RANDOM
+          </button>
+          <button 
+            className={`mode-button ${galleryMode === 'curated' ? 'active' : ''}`}
+            onClick={() => setGalleryMode('curated')}
+            title="Hand-picked collections"
+          >
+            CURATED
+          </button>
+        </div>
 
         <div 
           className={`nft-hero ${fade ? 'fade-in' : 'fade-out'}`}
@@ -256,6 +290,19 @@ export default function Gallery() {
                 {currentNFT.chain}
               </span>
             )}
+            {/* NEW: Show mode indicator */}
+            <span style={{
+              padding: '0.25rem 0.5rem',
+              background: galleryMode === 'curated' ? '#4f4' : '#333',
+              color: galleryMode === 'curated' ? '#000' : '#aaa',
+              fontSize: '0.7rem',
+              borderRadius: '3px',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              fontWeight: galleryMode === 'curated' ? 'bold' : 'normal'
+            }}>
+              {galleryMode === 'curated' ? 'CURATED' : 'RANDOM'}
+            </span>
           </div>
         </div>
 
