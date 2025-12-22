@@ -24,7 +24,7 @@ async function buildGalleryNFTs(keyword) {
     if (contracts.length === 0) return [];
     
     const nfts = [];
-    const MAX_NFTS = 200;
+    const MAX_NFTS = 100;
     const MAX_CONTRACTS = 500;
     const contractsToSearch = Math.min(contracts.length, MAX_CONTRACTS);
     
