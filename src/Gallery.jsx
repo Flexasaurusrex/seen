@@ -10,6 +10,7 @@ export default function Gallery() {
   const [loading, setLoading] = useState(true);
   const [fade, setFade] = useState(true);
   const [fullscreen, setFullscreen] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(true);
 
   // Fetch gallery data
   useEffect(() => {
@@ -37,7 +38,7 @@ export default function Gallery() {
 
   // Auto-advance slideshow
   useEffect(() => {
-    if (nfts.length === 0) return;
+    if (nfts.length === 0 || !isPlaying) return;
 
     const interval = setInterval(() => {
       setFade(false);
@@ -55,7 +56,7 @@ export default function Gallery() {
     }, 8000); // Change every 8 seconds
 
     return () => clearInterval(interval);
-  }, [nfts]);
+  }, [nfts, isPlaying]);
 
   async function trackView(nftId) {
     try {
@@ -86,6 +87,34 @@ export default function Gallery() {
     if (nft.external_url) {
       window.open(nft.external_url, '_blank');
     }
+  }
+
+  function goToNext() {
+    setFade(false);
+    setTimeout(() => {
+      setCurrentIndex((prev) => {
+        const next = (prev + 1) % nfts.length;
+        if (nfts[next]) {
+          trackView(nfts[next].id);
+        }
+        return next;
+      });
+      setFade(true);
+    }, 300);
+  }
+
+  function goToPrevious() {
+    setFade(false);
+    setTimeout(() => {
+      setCurrentIndex((prev) => {
+        const next = (prev - 1 + nfts.length) % nfts.length;
+        if (nfts[next]) {
+          trackView(nfts[next].id);
+        }
+        return next;
+      });
+      setFade(true);
+    }, 300);
   }
 
   if (loading) {
@@ -164,6 +193,19 @@ export default function Gallery() {
         <div className={`nft-info ${fade ? 'fade-in' : 'fade-out'}`}>
           <h2 className="nft-title">{currentNFT.title}</h2>
           <div className="nft-creator">{currentNFT.creator_name}</div>
+          <div className="nft-counter">{currentIndex + 1} of {nfts.length}</div>
+        </div>
+
+        <div className="gallery-controls">
+          <button onClick={goToPrevious} className="control-button" title="Previous">
+            ‹
+          </button>
+          <button onClick={() => setIsPlaying(!isPlaying)} className="control-button" title={isPlaying ? 'Pause' : 'Play'}>
+            {isPlaying ? '❚❚' : '▶'}
+          </button>
+          <button onClick={goToNext} className="control-button" title="Next">
+            ›
+          </button>
         </div>
 
         <div className="gallery-progress">
