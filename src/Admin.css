@@ -9,835 +9,595 @@
   --white: #ffffff;
 }
 
-.admin-login {
-  min-height: 100vh;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Archivo', -apple-system, sans-serif;
+  background: var(--black);
+  color: var(--white);
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+}
+
+.gallery {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.gallery-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--black);
+  z-index: 0;
+}
+
+.gallery-content {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.gallery-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 2rem 3rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 100;
+}
+
+.header-left {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+}
+
+.gallery-title {
+  font-family: 'Antonio', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--white);
+  line-height: 1;
+}
+
+.gallery-tagline {
+  font-family: 'Archivo', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 300;
+  letter-spacing: 0.05em;
+  color: var(--gray-light);
+}
+
+.mode-toggle {
+  position: fixed;
+  top: 2rem;
+  right: 12rem;
+  display: flex;
+  gap: 0;
+  background: #000;
+  border: 1px solid #333;
+  border-radius: 4px;
+  overflow: hidden;
+  z-index: 100;
+}
+
+.mode-button {
+  padding: 0.5rem 1.5rem;
+  background: transparent;
+  color: #666;
+  border: none;
+  font-family: 'Antonio', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-right: 1px solid #333;
+}
+
+.mode-button:last-child {
+  border-right: none;
+}
+
+.mode-button:hover {
+  background: #111;
+  color: #fff;
+}
+
+.mode-button.active {
+  background: #fff;
+  color: #000;
+  font-weight: 700;
+}
+
+.nft-hero {
+  position: fixed;
+  top: 6rem;
+  left: 0;
+  right: 0;
+  bottom: 6rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--black);
-}
-
-.login-form {
-  width: 100%;
-  max-width: 400px;
-  padding: 3rem;
-  background: var(--black-soft);
-  border: 1px solid var(--gray-dark);
-}
-
-.login-title {
-  font-family: 'Antonio', sans-serif;
-  font-size: 2rem;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--white);
-  margin-bottom: 2rem;
-  text-align: center;
-}
-
-.login-input {
-  width: 100%;
-  padding: 1rem;
-  margin-bottom: 1rem;
-  background: var(--black);
-  border: 1px solid var(--gray-dark);
-  color: var(--white);
-  font-family: 'Archivo', sans-serif;
-  font-size: 0.875rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  transition: border-color 0.3s;
-}
-
-.login-input:focus {
-  outline: none;
-  border-color: var(--white);
-}
-
-.login-button {
-  width: 100%;
-  padding: 1rem;
-  background: var(--white);
-  border: none;
-  color: var(--black);
-  font-family: 'Antonio', sans-serif;
-  font-size: 1rem;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 0 4rem;
 }
 
-.login-button:hover:not(:disabled) {
-  background: var(--gray-light);
+.nft-hero.fade-in {
+  opacity: 1;
 }
 
-.login-button:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
+.nft-hero.fade-out {
+  opacity: 0;
 }
 
-/* Admin Dashboard */
-.admin {
-  min-height: 100vh;
-  background: var(--black);
+.nft-image-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nft-image {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
+
+.nft-info {
+  position: fixed;
+  bottom: 2rem;
+  left: 3rem;
+  transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 90;
+  max-width: 400px;
+}
+
+.nft-info.fade-in {
+  opacity: 1;
+}
+
+.nft-info.fade-out {
+  opacity: 0;
+}
+
+.nft-title {
+  font-family: 'Antonio', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 0.25rem;
+  line-height: 1.2;
   color: var(--white);
+}
+
+.nft-creator {
+  font-family: 'Archivo', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 400;
+  letter-spacing: 0.05em;
+  color: var(--gray-light);
+  margin-bottom: 0.5rem;
+}
+
+.nft-counter {
+  font-family: 'Archivo', sans-serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  color: var(--gray);
+  text-transform: uppercase;
+}
+
+.nft-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.chain-badge {
+  padding: 0.25rem 0.5rem;
+  background: #333;
+  color: #aaa;
+  font-size: 0.7rem;
+  border-radius: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.mode-badge {
+  padding: 0.25rem 0.5rem;
+  background: #333;
+  color: #aaa;
+  font-size: 0.7rem;
+  border-radius: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.mode-badge.curated {
+  background: #4f4;
+  color: #000;
+  font-weight: bold;
+}
+
+.fullscreen-toggle {
+  position: fixed;
+  top: 2rem;
+  right: 3rem;
+  width: 48px;
+  height: 48px;
+  background: transparent;
+  border: 1px solid var(--gray-dark);
+  color: var(--gray-light);
+  padding: 0;
+  cursor: pointer;
+  z-index: 101;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.fullscreen-toggle:hover {
+  border-color: var(--white);
+  color: var(--white);
+}
+
+.fullscreen-toggle::before {
+  content: '⛶';
+  font-size: 20px;
+}
+
+.gallery.fullscreen .fullscreen-toggle::before {
+  content: '×';
+  font-size: 28px;
+}
+
+.gallery-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 2rem 3rem;
+  z-index: 100;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.footer-manifesto {
+  font-family: 'Archivo', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 400;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.85);
+  max-width: 800px;
+  text-align: center;
+  letter-spacing: 0.02em;
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.3),
+               0 0 40px rgba(255, 255, 255, 0.15);
+  background: rgba(0, 0, 0, 0.4);
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  backdrop-filter: blur(10px);
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.92);
+  z-index: 300;
+  cursor: pointer;
+  animation: overlayFadeIn 0.3s ease;
+}
+
+@keyframes overlayFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.collection-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  max-width: 700px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  background: #fff;
+  color: #000;
+  padding: 4rem 3rem;
+  z-index: 301;
+  border: 3px solid #000;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -45%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+.modal-close {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  width: 48px;
+  height: 48px;
+  background: transparent;
+  border: 2px solid #000;
+  font-size: 2rem;
+  line-height: 1;
+  cursor: pointer;
+  color: #000;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 300;
+}
+
+.modal-close:hover {
+  background: #000;
+  color: #fff;
+  transform: rotate(90deg);
+}
+
+.modal-collection-title {
+  font-family: 'Antonio', sans-serif;
+  font-size: 2.5rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 2rem;
+  line-height: 1;
+  color: #000;
+}
+
+.modal-collection-description {
+  font-family: 'Archivo', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 400;
+  line-height: 1.7;
+  letter-spacing: 0.01em;
+  color: #1a1a1a;
+}
+
+.collection-info-button {
+  position: fixed;
+  bottom: 6.5rem;
+  right: 3rem;
+  width: 48px;
+  height: 48px;
+  background: #fff;
+  color: #000;
+  border: 2px solid #000;
+  font-size: 1.5rem;
+  font-weight: bold;
+  cursor: pointer;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.collection-info-button:hover {
+  background: #000;
+  color: #fff;
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
+}
+
+.gallery.fullscreen .gallery-header,
+.gallery.fullscreen .gallery-footer,
+.gallery.fullscreen .nft-info,
+.gallery.fullscreen .mode-toggle,
+.gallery.fullscreen .collection-info-button {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.gallery.fullscreen:hover .fullscreen-toggle {
+  opacity: 1;
+}
+
+.gallery.fullscreen .nft-hero {
+  top: 0;
+  bottom: 0;
   padding: 2rem;
 }
 
-.admin-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 3rem;
-  padding-bottom: 2rem;
-  border-bottom: 1px solid var(--gray-dark);
-}
-
-.admin-title {
-  font-family: 'Antonio', sans-serif;
-  font-size: 2.5rem;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-}
-
-.logout-button {
-  padding: 0.75rem 2rem;
-  background: transparent;
-  border: 1px solid var(--gray);
-  color: var(--white);
-  font-family: 'Antonio', sans-serif;
-  font-size: 0.875rem;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.logout-button:hover {
-  background: var(--gray-dark);
-  border-color: var(--white);
-}
-
-/* Tabs */
-.admin-tabs {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 3rem;
-}
-
-.tab {
-  padding: 1rem 2rem;
-  background: transparent;
-  border: 1px solid var(--gray-dark);
-  color: var(--gray);
-  font-family: 'Antonio', sans-serif;
-  font-size: 1rem;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.tab:hover {
-  border-color: var(--gray);
-  color: var(--white);
-}
-
-.tab.active {
-  background: var(--white);
-  border-color: var(--white);
-  color: var(--black);
-}
-
-/* Admin Content */
-.admin-content {
-  max-width: 1200px;
-}
-
-.admin-section {
-  margin-bottom: 3rem;
-}
-
-.section-title {
-  font-family: 'Antonio', sans-serif;
-  font-size: 1.5rem;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  margin-bottom: 2rem;
-  color: var(--white);
-}
-
-/* Keyword Management */
-.keyword-creator {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 2rem;
-}
-
-.keyword-input {
-  flex: 1;
-  padding: 1rem;
-  background: var(--black-soft);
-  border: 1px solid var(--gray-dark);
-  color: var(--white);
-  font-family: 'Archivo', sans-serif;
-  font-size: 0.875rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  transition: border-color 0.3s;
-}
-
-.keyword-input:focus {
-  outline: none;
-  border-color: var(--white);
-}
-
-.button-secondary,
-.button-primary,
-.button-activate,
-.button-delete {
-  padding: 1rem 2rem;
-  border: 1px solid;
-  font-family: 'Antonio', sans-serif;
-  font-size: 0.875rem;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.button-secondary {
-  background: transparent;
-  border-color: var(--gray);
-  color: var(--white);
-}
-
-.button-secondary:hover:not(:disabled) {
-  background: var(--gray-dark);
-  border-color: var(--white);
-}
-
-.button-primary {
-  background: var(--white);
-  border-color: var(--white);
-  color: var(--black);
-}
-
-.button-primary:hover:not(:disabled) {
-  background: var(--gray-light);
-  border-color: var(--gray-light);
-}
-
-.button-activate {
-  background: transparent;
-  border-color: var(--white);
-  color: var(--white);
-}
-
-.button-activate:hover:not(:disabled) {
-  background: var(--white);
-  color: var(--black);
-}
-
-.button-delete {
-  background: transparent;
-  border-color: var(--gray);
-  color: var(--gray);
-}
-
-.button-delete:hover:not(:disabled) {
-  background: var(--gray-dark);
-  border-color: var(--white);
-  color: var(--white);
-}
-
-button:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-}
-
-/* Keywords List */
-.keywords-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.keyword-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.5rem;
-  background: var(--black-soft);
-  border: 1px solid var(--gray-dark);
-  transition: border-color 0.3s;
-}
-
-.keyword-item.active {
-  border-color: var(--white);
-  background: var(--gray-dark);
-}
-
-.keyword-info {
+.gallery-loading {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  justify-content: center;
+  min-height: 100vh;
+  background: var(--black);
 }
 
-.keyword-text {
-  font-family: 'Antonio', sans-serif;
-  font-size: 1.25rem;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: var(--white);
-}
-
-.active-badge {
-  padding: 0.25rem 1rem;
-  background: var(--white);
-  font-family: 'Antonio', sans-serif;
-  font-size: 0.75rem;
-  letter-spacing: 0.15em;
-  color: var(--black);
-}
-
-.keyword-date {
-  font-family: 'Archivo', sans-serif;
-  font-size: 0.875rem;
-  color: var(--gray);
-}
-
-.keyword-actions {
-  display: flex;
-  gap: 1rem;
-}
-
-/* Settings */
-.settings-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
-}
-
-.setting-item {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.setting-item.full-width {
-  grid-column: 1 / -1;
-}
-
-.setting-label {
-  font-family: 'Antonio', sans-serif;
-  font-size: 0.875rem;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: var(--gray);
-}
-
-.setting-input {
-  padding: 1rem;
-  background: var(--black-soft);
-  border: 1px solid var(--gray-dark);
-  color: var(--white);
-  font-family: 'Archivo', sans-serif;
-  font-size: 1rem;
-  transition: border-color 0.3s;
-}
-
-.setting-input:focus {
-  outline: none;
-  border-color: var(--white);
-}
-
-/* Analytics */
-.analytics-table {
-  background: var(--black-soft);
-  border: 1px solid var(--gray-dark);
-}
-
-.table-header,
-.table-row {
-  display: grid;
-  grid-template-columns: 2fr 1.5fr 1fr 1fr 1fr;
-  gap: 1rem;
-  padding: 1rem;
-}
-
-.table-header {
-  background: var(--gray-dark);
-  border-bottom: 1px solid var(--gray);
-}
-
-.table-row {
-  border-bottom: 1px solid var(--gray-dark);
-}
-
-.table-row:last-child {
-  border-bottom: none;
-}
-
-.table-cell {
-  font-family: 'Archivo', sans-serif;
-  font-size: 0.875rem;
-  color: var(--white);
-}
-
-.table-header .table-cell {
-  font-family: 'Antonio', sans-serif;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--gray);
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .admin {
-    padding: 1rem;
-  }
-
-  .admin-header {
-    flex-direction: column;
-    gap: 1rem;
-    align-items: flex-start;
-  }
-
-  .admin-tabs {
-    flex-direction: column;
-  }
-
-  .keyword-creator {
-    flex-direction: column;
-  }
-
-  .keyword-item {
-    flex-direction: column;
-    gap: 1rem;
-    align-items: flex-start;
-  }
-
-  .keyword-actions {
-    width: 100%;
-    flex-direction: column;
-  }
-
-  .table-header,
-  .table-row {
-    grid-template-columns: 1fr;
-  }
-}
-
-
-.login-form {
-  width: 100%;
-  max-width: 400px;
-  padding: 3rem;
-  background: #1a1a1a;
-  border: 2px solid #2a2a2a;
-}
-
-.login-title {
+.loading-text {
   font-family: 'Antonio', sans-serif;
   font-size: 2rem;
-  letter-spacing: 0.2em;
+  font-weight: 700;
+  letter-spacing: 0.3em;
   text-transform: uppercase;
-  color: #ffffff;
-  margin-bottom: 2rem;
-  text-align: center;
+  color: var(--gray);
 }
 
-.login-input {
+.gallery-empty {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.gallery-empty .gallery-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8rem 3rem;
+}
+
+.empty-container {
   width: 100%;
-  padding: 1rem;
-  margin-bottom: 1rem;
-  background: #0a0a0a;
-  border: 2px solid #2a2a2a;
-  color: #ffffff;
-  font-family: 'Archivo', sans-serif;
-  font-size: 0.875rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  transition: border-color 0.3s;
+  max-width: 900px;
+  display: flex;
+  justify-content: center;
 }
 
-.login-input:focus {
-  outline: none;
-  border-color: #ff0000;
-}
-
-.login-button {
+.empty-box {
+  position: relative;
   width: 100%;
-  padding: 1rem;
-  background: #ff0000;
-  border: none;
-  color: #ffffff;
+  max-width: 700px;
+  aspect-ratio: 16 / 10;
+  border: 1px solid var(--gray-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.empty-text {
   font-family: 'Antonio', sans-serif;
-  font-size: 1rem;
+  font-size: 1.5rem;
+  font-weight: 700;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  cursor: pointer;
-  transition: background 0.3s;
-}
-
-.login-button:hover:not(:disabled) {
-  background: #cc0000;
-}
-
-.login-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* Admin Dashboard */
-.admin {
-  min-height: 100vh;
-  background: #0a0a0a;
-  color: #ffffff;
+  color: var(--gray-dark);
+  text-align: center;
   padding: 2rem;
 }
 
-.admin-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 3rem;
-  padding-bottom: 2rem;
-  border-bottom: 2px solid #2a2a2a;
-}
-
-.admin-title {
-  font-family: 'Antonio', sans-serif;
-  font-size: 2.5rem;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-}
-
-.logout-button {
-  padding: 0.75rem 2rem;
-  background: #2a2a2a;
-  border: 2px solid #4a4a4a;
-  color: #ffffff;
-  font-family: 'Antonio', sans-serif;
-  font-size: 0.875rem;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.logout-button:hover {
-  background: #1a1a1a;
-  border-color: #ff0000;
-}
-
-/* Tabs */
-.admin-tabs {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 3rem;
-}
-
-.tab {
-  padding: 1rem 2rem;
-  background: transparent;
-  border: 2px solid #2a2a2a;
-  color: #4a4a4a;
-  font-family: 'Antonio', sans-serif;
-  font-size: 1rem;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.tab:hover {
-  border-color: #4a4a4a;
-  color: #ffffff;
-}
-
-.tab.active {
-  background: #ff0000;
-  border-color: #ff0000;
-  color: #ffffff;
-}
-
-/* Admin Content */
-.admin-content {
-  max-width: 1200px;
-}
-
-.admin-section {
-  margin-bottom: 3rem;
-}
-
-.section-title {
-  font-family: 'Antonio', sans-serif;
-  font-size: 1.5rem;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  margin-bottom: 2rem;
-  color: #ffffff;
-}
-
-/* Keyword Management */
-.keyword-creator {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 2rem;
-}
-
-.keyword-input {
-  flex: 1;
-  padding: 1rem;
-  background: #1a1a1a;
-  border: 2px solid #2a2a2a;
-  color: #ffffff;
-  font-family: 'Archivo', sans-serif;
-  font-size: 0.875rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  transition: border-color 0.3s;
-}
-
-.keyword-input:focus {
-  outline: none;
-  border-color: #ff0000;
-}
-
-.button-secondary,
-.button-primary,
-.button-activate,
-.button-delete {
-  padding: 1rem 2rem;
-  border: 2px solid;
-  font-family: 'Antonio', sans-serif;
-  font-size: 0.875rem;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.button-secondary {
-  background: transparent;
-  border-color: #4a4a4a;
-  color: #ffffff;
-}
-
-.button-secondary:hover:not(:disabled) {
-  background: #2a2a2a;
-}
-
-.button-primary {
-  background: #ff0000;
-  border-color: #ff0000;
-  color: #ffffff;
-}
-
-.button-primary:hover:not(:disabled) {
-  background: #cc0000;
-  border-color: #cc0000;
-}
-
-.button-activate {
-  background: transparent;
-  border-color: #00ff00;
-  color: #00ff00;
-}
-
-.button-activate:hover:not(:disabled) {
-  background: #00ff00;
-  color: #0a0a0a;
-}
-
-.button-delete {
-  background: transparent;
-  border-color: #ff0000;
-  color: #ff0000;
-}
-
-.button-delete:hover:not(:disabled) {
-  background: #ff0000;
-  color: #ffffff;
-}
-
-button:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-}
-
-/* Keywords List */
-.keywords-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.keyword-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.5rem;
-  background: #1a1a1a;
-  border: 2px solid #2a2a2a;
-  transition: border-color 0.3s;
-}
-
-.keyword-item.active {
-  border-color: #ff0000;
-  background: rgba(255, 0, 0, 0.05);
-}
-
-.keyword-info {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-}
-
-.keyword-text {
-  font-family: 'Antonio', sans-serif;
-  font-size: 1.25rem;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: #ffffff;
-}
-
-.active-badge {
-  padding: 0.25rem 1rem;
-  background: #ff0000;
-  font-family: 'Antonio', sans-serif;
-  font-size: 0.75rem;
-  letter-spacing: 0.15em;
-  color: #ffffff;
-}
-
-.keyword-date {
-  font-family: 'Archivo', sans-serif;
-  font-size: 0.875rem;
-  color: #4a4a4a;
-}
-
-.keyword-actions {
-  display: flex;
-  gap: 1rem;
-}
-
-/* Settings */
-.settings-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
-}
-
-.setting-item {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.setting-item.full-width {
-  grid-column: 1 / -1;
-}
-
-.setting-label {
-  font-family: 'Antonio', sans-serif;
-  font-size: 0.875rem;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: #4a4a4a;
-}
-
-.setting-input {
-  padding: 1rem;
-  background: #1a1a1a;
-  border: 2px solid #2a2a2a;
-  color: #ffffff;
-  font-family: 'Archivo', sans-serif;
-  font-size: 1rem;
-  transition: border-color 0.3s;
-}
-
-.setting-input:focus {
-  outline: none;
-  border-color: #ff0000;
-}
-
-/* Analytics */
-.analytics-table {
-  background: #1a1a1a;
-  border: 2px solid #2a2a2a;
-}
-
-.table-header,
-.table-row {
-  display: grid;
-  grid-template-columns: 2fr 1.5fr 1fr 1fr 1fr;
-  gap: 1rem;
-  padding: 1rem;
-}
-
-.table-header {
-  background: #2a2a2a;
-  border-bottom: 2px solid #4a4a4a;
-}
-
-.table-row {
-  border-bottom: 1px solid #2a2a2a;
-}
-
-.table-row:last-child {
-  border-bottom: none;
-}
-
-.table-cell {
-  font-family: 'Archivo', sans-serif;
-  font-size: 0.875rem;
-  color: #ffffff;
-}
-
-.table-header .table-cell {
-  font-family: 'Antonio', sans-serif;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: #4a4a4a;
-}
-
-/* Responsive */
 @media (max-width: 768px) {
-  .admin {
-    padding: 1rem;
+  .gallery-header {
+    padding: 1.5rem 2rem;
   }
 
-  .admin-header {
-    flex-direction: column;
-    gap: 1rem;
-    align-items: flex-start;
+  .mode-toggle {
+    top: 1.5rem;
+    right: 6rem;
   }
 
-  .admin-tabs {
-    flex-direction: column;
+  .mode-button {
+    padding: 0.4rem 1rem;
+    font-size: 0.8rem;
   }
 
-  .keyword-creator {
-    flex-direction: column;
+  .nft-hero {
+    padding: 0 2rem;
+    top: 5rem;
+    bottom: 2rem;
   }
 
-  .keyword-item {
-    flex-direction: column;
-    gap: 1rem;
-    align-items: flex-start;
+  .nft-info {
+    left: 2rem;
+    bottom: 1.5rem;
+    max-width: calc(100% - 4rem);
   }
 
-  .keyword-actions {
-    width: 100%;
-    flex-direction: column;
+  .collection-modal {
+    padding: 3rem 2rem;
+    width: 85%;
+    max-height: 70vh;
   }
 
-  .table-header,
-  .table-row {
-    grid-template-columns: 1fr;
+  .modal-collection-title {
+    font-size: 1.75rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .modal-collection-description {
+    font-size: 1rem;
+  }
+
+  .modal-close {
+    width: 40px;
+    height: 40px;
+    font-size: 1.75rem;
+    top: 1rem;
+    right: 1rem;
+  }
+
+  .collection-info-button {
+    bottom: 1.5rem !important;
+    right: 2rem;
+    width: 44px;
+    height: 44px;
+    font-size: 1.3rem;
+  }
+
+  .gallery-footer {
+    display: none !important;
+  }
+
+  .nft-meta {
+    display: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nft-hero,
+  .nft-info,
+  .nft-image,
+  .fullscreen-toggle,
+  .mode-button,
+  .modal-overlay,
+  .collection-modal,
+  .collection-info-button {
+    transition: none;
+    animation: none;
+  }
+  
+  .loading-text,
+  .empty-text {
+    animation: none;
   }
 }
