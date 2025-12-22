@@ -31,43 +31,30 @@ async function cacheContractNFTs(contractAddress, chain, contractId) {
     
     console.log(`Total supply: ${totalSupply}`);
     
-    // Generate random token IDs across the entire collection
-    const randomTokenIds = new Set();
-    const targetTokens = Math.min(500, totalSupply);
-    
-    while (randomTokenIds.size < targetTokens) {
-      const randomId = Math.floor(Math.random() * totalSupply);
-      randomTokenIds.add(randomId.toString());
-    }
-    
-    console.log(`Generated ${randomTokenIds.size} random token IDs to fetch`);
-    
     const allNFTs = [];
-    let fetchedCount = 0;
+    const targetNFTs = 100;
+    const segmentSize = 100; // Fetch 100 tokens per segment
+    const numSegments = 5; // Fetch from 5 random segments
     
-    // Fetch NFTs in batches (Alchemy allows batch requests)
-    const tokenIdArray = Array.from(randomTokenIds);
+    // Divide collection into segments and pick random starting points
+    const segmentWidth = Math.floor(totalSupply / numSegments);
     
-    for (let i = 0; i < tokenIdArray.length; i += 50) {
-      const batch = tokenIdArray.slice(i, i + 50);
+    for (let i = 0; i < numSegments; i++) {
+      // Pick a random starting point within this segment
+      const segmentStart = i * segmentWidth;
+      const segmentEnd = Math.min((i + 1) * segmentWidth, totalSupply);
+      const randomOffset = segmentStart + Math.floor(Math.random() * Math.max(1, segmentEnd - segmentStart - segmentSize));
+      
+      console.log(`Fetching segment ${i + 1}/${numSegments} starting from token ~${randomOffset}`);
       
       try {
-        // Fetch each token individually (could optimize with getNftsForContract but need specific tokens)
-        const batchPromises = batch.map(async (tokenId) => {
-          try {
-            const nft = await alchemy.nft.getNftMetadata(contractAddress, tokenId);
-            return nft;
-          } catch (err) {
-            console.log(`Failed to fetch token ${tokenId}: ${err.message}`);
-            return null;
-          }
+        // Fetch NFTs starting from this random offset
+        const nftsResponse = await alchemy.nft.getNftsForContract(contractAddress, {
+          pageSize: segmentSize,
+          startToken: randomOffset.toString()
         });
         
-        const batchResults = await Promise.all(batchPromises);
-        
-        for (const nft of batchResults) {
-          if (!nft) continue;
-          
+        for (const nft of nftsResponse.nfts || []) {
           const image = nft.image?.cachedUrl || nft.image?.originalUrl || nft.raw?.metadata?.image;
           
           if (image && (image.startsWith('http://') || image.startsWith('https://'))) {
@@ -85,24 +72,23 @@ async function cacheContractNFTs(contractAddress, chain, contractId) {
           }
         }
         
-        fetchedCount += batch.length;
-        console.log(`Fetched ${fetchedCount}/${targetTokens} random tokens...`);
+        console.log(`Segment ${i + 1} fetched, total NFTs so far: ${allNFTs.length}`);
         
       } catch (err) {
-        console.error(`Batch fetch error:`, err.message);
+        console.error(`Error fetching segment ${i + 1}:`, err.message);
       }
     }
     
-    console.log(`Total fetched: ${allNFTs.length} valid NFTs from random sampling`);
+    console.log(`Total fetched: ${allNFTs.length} NFTs from ${numSegments} random segments`);
     
-    // Shuffle the results
+    // Fisher-Yates shuffle
     const shuffled = [...allNFTs];
     for (let i = shuffled.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
     
-    const sampled = shuffled.slice(0, 100);
+    const sampled = shuffled.slice(0, targetNFTs);
     
     console.log(`Returning ${sampled.length} randomly sampled NFTs from contract ${contractAddress}`);
     return sampled;
