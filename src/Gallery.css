@@ -1,0 +1,402 @@
+@import url('https://fonts.googleapis.com/css2?family=Antonio:wght@700&family=Archivo:wght@300;400;500&display=swap');
+
+:root {
+  --black: #000000;
+  --black-soft: #0a0a0a;
+  --gray-dark: #1a1a1a;
+  --gray: #404040;
+  --gray-light: #808080;
+  --white: #ffffff;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Archivo', -apple-system, sans-serif;
+  background: var(--black);
+  color: var(--white);
+  overflow-x: hidden;
+}
+
+.gallery {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.gallery-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--black);
+  z-index: 0;
+}
+
+.gallery-content {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+/* Header */
+.gallery-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 3rem 2rem 2rem;
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  z-index: 100;
+  background: linear-gradient(to bottom, var(--black) 0%, transparent 100%);
+}
+
+.header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.gallery-title {
+  font-family: 'Antonio', sans-serif;
+  font-size: clamp(2.5rem, 6vw, 5rem);
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--white);
+  line-height: 1;
+}
+
+.gallery-tagline {
+  font-family: 'Archivo', sans-serif;
+  font-size: clamp(0.875rem, 1.5vw, 1.125rem);
+  font-weight: 300;
+  letter-spacing: 0.05em;
+  color: var(--gray-light);
+  margin-top: 0.5rem;
+}
+
+/* NFT Hero */
+.nft-hero {
+  margin-top: 12rem;
+  margin-bottom: 4rem;
+  cursor: pointer;
+  transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nft-hero.fade-in {
+  opacity: 1;
+}
+
+.nft-hero.fade-out {
+  opacity: 0;
+}
+
+.nft-image-container {
+  position: relative;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background: var(--black-soft);
+  border: 1px solid var(--gray);
+}
+
+.nft-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nft-hero:hover .nft-image {
+  transform: scale(1.01);
+}
+
+/* NFT Info */
+.nft-info {
+  max-width: 900px;
+  margin: 0 auto 6rem;
+  text-align: center;
+  transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nft-info.fade-in {
+  opacity: 1;
+}
+
+.nft-info.fade-out {
+  opacity: 0;
+}
+
+.nft-title {
+  font-family: 'Antonio', sans-serif;
+  font-size: clamp(1.5rem, 4vw, 3rem);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+  line-height: 1.2;
+  color: var(--white);
+}
+
+.nft-creator {
+  font-family: 'Archivo', sans-serif;
+  font-size: 1rem;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  color: var(--gray-light);
+  text-transform: uppercase;
+}
+
+/* Progress */
+.gallery-progress {
+  position: fixed;
+  bottom: 16rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 4rem);
+  max-width: 600px;
+  z-index: 100;
+}
+
+.progress-text {
+  font-family: 'Antonio', sans-serif;
+  font-size: 0.875rem;
+  letter-spacing: 0.2em;
+  color: var(--gray);
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 1px;
+  background: var(--gray-dark);
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: var(--white);
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Footer */
+.gallery-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 3rem 2rem;
+  z-index: 100;
+  background: linear-gradient(to top, var(--black) 0%, transparent 100%);
+}
+
+.footer-manifesto {
+  font-family: 'Archivo', sans-serif;
+  font-size: clamp(0.875rem, 1.2vw, 1rem);
+  font-weight: 300;
+  line-height: 1.8;
+  color: var(--gray-light);
+  max-width: 900px;
+  margin: 0 auto 2rem;
+  text-align: center;
+}
+
+.footer-meta {
+  font-family: 'Archivo', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 300;
+  letter-spacing: 0.05em;
+  color: var(--gray);
+  text-align: center;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0 0.75rem;
+}
+
+.footer-separator {
+  color: var(--gray-dark);
+}
+
+/* Loading State */
+.gallery-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: var(--black);
+}
+
+.gallery-empty {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.gallery-empty .gallery-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--black);
+  z-index: 0;
+}
+
+.gallery-empty .gallery-content {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+.gallery-empty .gallery-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 3rem 2rem 2rem;
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  z-index: 100;
+  background: linear-gradient(to bottom, var(--black) 0%, transparent 100%);
+}
+
+.gallery-empty .gallery-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 3rem 2rem;
+  z-index: 100;
+  background: linear-gradient(to top, var(--black) 0%, transparent 100%);
+}
+
+.empty-container {
+  margin-top: 12rem;
+  margin-bottom: 4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.empty-box {
+  position: relative;
+  width: 100%;
+  max-width: 800px;
+  aspect-ratio: 1 / 1;
+  background: var(--black-soft);
+  border: 1px solid var(--gray);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-text,
+.empty-text {
+  font-family: 'Antonio', sans-serif;
+  font-size: clamp(1.5rem, 4vw, 3rem);
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gray-light);
+  animation: pulse 2s infinite;
+  text-align: center;
+  padding: 2rem;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 1; }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .gallery {
+    padding: 1rem;
+  }
+
+  .gallery-header {
+    padding: 2rem 1rem 1.5rem;
+  }
+
+  .nft-hero {
+    margin-top: 10rem;
+    margin-bottom: 2rem;
+  }
+
+  .nft-image-container {
+    aspect-ratio: 1 / 1;
+  }
+
+  .nft-info {
+    margin-bottom: 3rem;
+  }
+
+  .gallery-progress {
+    bottom: 12rem;
+    width: calc(100% - 2rem);
+  }
+
+  .gallery-footer {
+    padding: 2rem 1rem;
+  }
+
+  .footer-meta {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .footer-separator {
+    display: none;
+  }
+}
+
+/* Print Prevention */
+@media print {
+  .gallery {
+    display: none;
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .nft-hero,
+  .nft-info,
+  .nft-image,
+  .progress-fill {
+    transition: none;
+  }
+  
+  .loading-text,
+  .empty-text {
+    animation: none;
+    opacity: 1;
+  }
+}
