@@ -36,8 +36,11 @@ async function buildGalleryNFTs(keyword, maxNfts = 50, maxContracts = 500) {
 
         for (const nft of nftsForContract.nfts || []) {
           if (nfts.length >= maxNfts) break;
+          
           const image = nft.image?.cachedUrl || nft.image?.originalUrl || nft.raw?.metadata?.image;
-          if (image) {
+          
+          // Only include NFTs with valid HTTP(S) image URLs
+          if (image && (image.startsWith('http://') || image.startsWith('https://'))) {
             nfts.push({
               contractAddress: nft.contract.address,
               tokenId: nft.tokenId,
