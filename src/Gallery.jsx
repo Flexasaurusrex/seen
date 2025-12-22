@@ -181,8 +181,9 @@ export default function Gallery() {
         <button 
           className="fullscreen-toggle"
           onClick={() => setFullscreen(!fullscreen)}
+          title={fullscreen ? 'Exit fullscreen' : 'Fullscreen'}
         >
-          {fullscreen ? 'EXIT FULLSCREEN' : 'FULLSCREEN'}
+          {fullscreen ? '×' : ''}
         </button>
 
         <footer className="gallery-footer">
