@@ -43,7 +43,7 @@ export default async function handler(req, res) {
         return res.status(404).json({ error: 'Keyword not found' });
       }
       
-      return res.json({ success: true, deleted: result.rows[0] });
+      return res.json({ success: true });
     }
 
     return res.status(405).json({ error: 'Method not allowed' });
