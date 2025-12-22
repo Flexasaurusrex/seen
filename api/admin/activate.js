@@ -62,7 +62,7 @@ async function buildGalleryNFTs(keyword) {
         }
         
         // Aggressive delay after every contract to avoid rate limits
-        await delay(100);
+        await delay(33);
         
         // Log progress every 50 contracts
         if (i % 50 === 0 && i > 0) {
