@@ -25,33 +25,64 @@ async function cacheContractNFTs(contractAddress, chain, contractId) {
   try {
     console.log(`Caching NFTs from ${chain} contract: ${contractAddress}`);
     
-    // Fetch up to 100 NFTs from this contract
-    const nftsResponse = await alchemy.nft.getNftsForContract(contractAddress, {
-      pageSize: 100
-    });
-
-    const nfts = [];
+    // First get contract metadata to see total supply
+    const contractMetadata = await alchemy.nft.getContractMetadata(contractAddress);
+    const totalSupply = parseInt(contractMetadata.totalSupply) || 1000;
     
-    for (const nft of nftsResponse.nfts || []) {
-      const image = nft.image?.cachedUrl || nft.image?.originalUrl || nft.raw?.metadata?.image;
+    console.log(`Total supply: ${totalSupply}`);
+    
+    const allNFTs = [];
+    let pageKey = undefined;
+    let fetchedCount = 0;
+    const maxToFetch = Math.min(500, totalSupply); // Fetch up to 500 to sample from
+    
+    // Fetch multiple pages to get a diverse sample
+    while (fetchedCount < maxToFetch) {
+      const nftsResponse = await alchemy.nft.getNftsForContract(contractAddress, {
+        pageSize: 100,
+        pageKey: pageKey
+      });
       
-      if (image && (image.startsWith('http://') || image.startsWith('https://'))) {
-        const openseaChain = chain === 'base' ? 'base' : 'ethereum';
-        const openseaUrl = `https://opensea.io/assets/${openseaChain}/${nft.contract.address}/${nft.tokenId}`;
+      for (const nft of nftsResponse.nfts || []) {
+        const image = nft.image?.cachedUrl || nft.image?.originalUrl || nft.raw?.metadata?.image;
         
-        nfts.push({
-          contractId: contractId,
-          tokenId: nft.tokenId,
-          title: nft.name || nft.contract.name || 'Untitled',
-          description: nft.description || '',
-          image: image,
-          externalUrl: nft.raw?.metadata?.external_url || openseaUrl
-        });
+        if (image && (image.startsWith('http://') || image.startsWith('https://'))) {
+          const openseaChain = chain === 'base' ? 'base' : 'ethereum';
+          const openseaUrl = `https://opensea.io/assets/${openseaChain}/${nft.contract.address}/${nft.tokenId}`;
+          
+          allNFTs.push({
+            contractId: contractId,
+            tokenId: nft.tokenId,
+            title: nft.name || nft.contract.name || 'Untitled',
+            description: nft.description || '',
+            image: image,
+            externalUrl: nft.raw?.metadata?.external_url || openseaUrl
+          });
+        }
       }
+      
+      fetchedCount += nftsResponse.nfts?.length || 0;
+      pageKey = nftsResponse.pageKey;
+      
+      // Stop if no more pages or we have enough
+      if (!pageKey || fetchedCount >= maxToFetch) break;
+      
+      console.log(`Fetched ${fetchedCount} NFTs so far...`);
     }
     
-    console.log(`Found ${nfts.length} valid NFTs from contract ${contractAddress}`);
-    return nfts;
+    console.log(`Total fetched: ${allNFTs.length} NFTs`);
+    
+    // Randomly sample 100 NFTs using Fisher-Yates shuffle
+    const shuffled = [...allNFTs];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    
+    const sampled = shuffled.slice(0, 100);
+    
+    console.log(`Returning ${sampled.length} randomly sampled NFTs from contract ${contractAddress}`);
+    return sampled;
   } catch (error) {
     console.error(`Error caching contract ${contractAddress}:`, error.message);
     return [];
