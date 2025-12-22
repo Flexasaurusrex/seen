@@ -4,365 +4,432 @@ import './Admin.css';
 const API_BASE = window.location.origin;
 
 function Admin() {
-  const [credentials, setCredentials] = useState({ username: '', password: '' });
+  const [auth, setAuth] = useState({ username: '', password: '' });
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [keywords, setKeywords] = useState([]);
-  const [settings, setSettings] = useState({});
-  const [stats, setStats] = useState({});
+  const [settings, setSettings] = useState({ max_nfts: 50, max_contracts: 500 });
   const [newKeyword, setNewKeyword] = useState('');
+  const [message, setMessage] = useState({ text: '', type: '' });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
 
-  const authHeaders = () => ({
-    'Authorization': 'Basic ' + btoa(`${credentials.username}:${credentials.password}`),
+  const authHeaders = {
+    'Authorization': 'Basic ' + btoa(`${auth.username}:${auth.password}`),
     'Content-Type': 'application/json'
-  });
+  };
+
+  const showMessage = (text, type = 'success') => {
+    setMessage({ text, type });
+    setTimeout(() => setMessage({ text: '', type: '' }), 4000);
+  };
 
   const login = async (e) => {
     e.preventDefault();
-    setError('');
     try {
-      const response = await fetch(`${API_BASE}/api/admin/keywords`, {
-        headers: authHeaders()
-      });
-      
-      if (response.ok) {
+      const res = await fetch(`${API_BASE}/api/admin/keywords`, { headers: authHeaders });
+      if (res.ok) {
         setIsAuthenticated(true);
-        fetchAllData();
+        loadData();
       } else {
-        setError('Invalid credentials');
+        showMessage('Invalid credentials', 'error');
       }
     } catch (err) {
-      setError('Login failed');
+      showMessage('Login failed', 'error');
     }
   };
 
-  const fetchAllData = async () => {
+  const loadData = async () => {
     try {
-      const [keywordsRes, settingsRes] = await Promise.all([
-        fetch(`${API_BASE}/api/admin/keywords`, { headers: authHeaders() }),
-        fetch(`${API_BASE}/api/admin/settings`, { headers: authHeaders() })
+      const [kwRes, setRes] = await Promise.all([
+        fetch(`${API_BASE}/api/admin/keywords`, { headers: authHeaders }),
+        fetch(`${API_BASE}/api/admin/settings`, { headers: authHeaders })
       ]);
 
-      if (keywordsRes.ok) {
-        const keywordsData = await keywordsRes.json();
-        setKeywords(keywordsData);
-        
-        // Get stats for active keyword
-        const active = keywordsData.find(k => k.is_active);
-        if (active) {
-          fetchKeywordStats(active.id);
-        }
+      if (kwRes.ok) {
+        const data = await kwRes.json();
+        setKeywords(data);
       }
 
-      if (settingsRes.ok) {
-        const settingsData = await settingsRes.json();
-        setSettings(settingsData);
+      if (setRes.ok) {
+        const data = await setRes.json();
+        setSettings(data);
       }
     } catch (err) {
-      console.error('Fetch error:', err);
-    }
-  };
-
-  const fetchKeywordStats = async (keywordId) => {
-    try {
-      const response = await fetch(`${API_BASE}/api/admin/keywords/${keywordId}/stats`, {
-        headers: authHeaders()
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setStats(data);
-      }
-    } catch (err) {
-      console.error('Stats error:', err);
+      console.error('Load error:', err);
     }
   };
 
   const addKeyword = async (e) => {
     e.preventDefault();
     if (!newKeyword.trim()) return;
-    
+
     setLoading(true);
-    setError('');
-    setSuccess('');
-    
     try {
-      const response = await fetch(`${API_BASE}/api/admin/keywords`, {
+      const res = await fetch(`${API_BASE}/api/admin/keywords`, {
         method: 'POST',
-        headers: authHeaders(),
+        headers: authHeaders,
         body: JSON.stringify({ keyword: newKeyword.trim() })
       });
 
-      if (response.ok) {
+      if (res.ok) {
         setNewKeyword('');
-        setSuccess('Keyword added!');
-        fetchAllData();
-        setTimeout(() => setSuccess(''), 3000);
+        showMessage('Keyword added');
+        loadData();
       } else {
-        const data = await response.json();
-        setError(data.error || 'Failed to add keyword');
+        const data = await res.json();
+        showMessage(data.error || 'Failed to add', 'error');
       }
     } catch (err) {
-      setError('Failed to add keyword');
-    } finally {
-      setLoading(false);
+      showMessage('Failed to add', 'error');
     }
+    setLoading(false);
   };
 
-  const deleteKeyword = async (id) => {
-    if (!confirm('Delete this keyword? This will remove all associated NFTs.')) return;
-    
+  const deleteKeyword = async (id, keyword) => {
+    if (!confirm(`Delete "${keyword}"? This removes all its NFTs.`)) return;
+
     setLoading(true);
-    setError('');
-    
     try {
-      const response = await fetch(`${API_BASE}/api/admin/keywords/${id}`, {
+      const res = await fetch(`${API_BASE}/api/admin/keywords/${id}`, {
         method: 'DELETE',
-        headers: authHeaders()
+        headers: authHeaders
       });
 
-      if (response.ok) {
-        setSuccess('Keyword deleted!');
-        fetchAllData();
-        setTimeout(() => setSuccess(''), 3000);
+      if (res.ok) {
+        showMessage('Keyword deleted');
+        loadData();
       } else {
-        setError('Failed to delete keyword');
+        showMessage('Failed to delete', 'error');
       }
     } catch (err) {
-      setError('Failed to delete keyword');
-    } finally {
-      setLoading(false);
+      showMessage('Failed to delete', 'error');
     }
+    setLoading(false);
   };
 
-  const activateKeyword = async (id) => {
+  const activateKeyword = async (id, keyword) => {
     setLoading(true);
-    setError('');
-    setSuccess('');
-    
+    showMessage(`Activating "${keyword}"... fetching NFTs...`, 'info');
+
     try {
-      const response = await fetch(`${API_BASE}/api/admin/activate`, {
+      const res = await fetch(`${API_BASE}/api/admin/activate`, {
         method: 'POST',
-        headers: authHeaders(),
+        headers: authHeaders,
         body: JSON.stringify({ id })
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        setSuccess(`Activated! Fetched ${data.nftCount} NFTs from ${data.contractsSearched || settings.max_contracts || 500} contracts`);
-        fetchAllData();
-        setTimeout(() => setSuccess(''), 5000);
+      if (res.ok) {
+        const data = await res.json();
+        showMessage(`Activated! Fetched ${data.nftCount} NFTs`);
+        loadData();
       } else {
-        const data = await response.json();
-        setError(data.error || 'Activation failed');
+        const data = await res.json();
+        showMessage(data.error || 'Activation failed', 'error');
       }
     } catch (err) {
-      setError('Activation failed');
-    } finally {
-      setLoading(false);
+      showMessage('Activation failed', 'error');
     }
+    setLoading(false);
   };
 
-  const updateSettings = async (key, value) => {
+  const updateSetting = async (key, value) => {
     try {
-      const response = await fetch(`${API_BASE}/api/admin/settings`, {
+      const res = await fetch(`${API_BASE}/api/admin/settings`, {
         method: 'PUT',
-        headers: authHeaders(),
+        headers: authHeaders,
         body: JSON.stringify({ [key]: value })
       });
 
-      if (response.ok) {
+      if (res.ok) {
         setSettings({ ...settings, [key]: value });
-        setSuccess('Settings updated!');
-        setTimeout(() => setSuccess(''), 3000);
+        showMessage('Setting updated');
       }
     } catch (err) {
-      setError('Failed to update settings');
+      showMessage('Failed to update', 'error');
     }
   };
 
+  // Login screen
   if (!isAuthenticated) {
     return (
-      <div className="admin-login">
-        <div className="login-container">
-          <h1 className="login-title">ADMIN ACCESS</h1>
-          <form onSubmit={login} className="login-form">
-            <input
-              type="text"
-              placeholder="USERNAME"
-              value={credentials.username}
-              onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
-              className="login-input"
-              autoComplete="username"
-            />
-            <input
-              type="password"
-              placeholder="PASSWORD"
-              value={credentials.password}
-              onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
-              className="login-input"
-              autoComplete="current-password"
-            />
-            <button type="submit" className="login-button">
-              {loading ? 'AUTHENTICATING...' : 'LOGIN'}
-            </button>
-            {error && <div className="error-message">{error}</div>}
-          </form>
-        </div>
+      <div style={{ 
+        minHeight: '100vh', 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center',
+        background: '#000',
+        color: '#fff',
+        fontFamily: 'monospace'
+      }}>
+        <form onSubmit={login} style={{ width: '300px' }}>
+          <h1 style={{ marginBottom: '2rem', letterSpacing: '0.2em' }}>ADMIN</h1>
+          <input
+            type="text"
+            placeholder="Username"
+            value={auth.username}
+            onChange={(e) => setAuth({ ...auth, username: e.target.value })}
+            style={{
+              width: '100%',
+              padding: '0.75rem',
+              marginBottom: '1rem',
+              background: '#111',
+              border: '1px solid #333',
+              color: '#fff'
+            }}
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={auth.password}
+            onChange={(e) => setAuth({ ...auth, password: e.target.value })}
+            style={{
+              width: '100%',
+              padding: '0.75rem',
+              marginBottom: '1rem',
+              background: '#111',
+              border: '1px solid #333',
+              color: '#fff'
+            }}
+          />
+          <button type="submit" style={{
+            width: '100%',
+            padding: '0.75rem',
+            background: '#fff',
+            color: '#000',
+            border: 'none',
+            cursor: 'pointer',
+            fontWeight: 'bold'
+          }}>
+            LOGIN
+          </button>
+          {message.text && (
+            <div style={{ marginTop: '1rem', color: message.type === 'error' ? '#f44' : '#4f4' }}>
+              {message.text}
+            </div>
+          )}
+        </form>
       </div>
     );
   }
 
   const activeKeyword = keywords.find(k => k.is_active);
 
+  // Admin panel
   return (
-    <div className="admin-dashboard">
-      <header className="admin-header">
-        <h1 className="admin-title">GALLERY ADMIN</h1>
-        <button onClick={() => setIsAuthenticated(false)} className="logout-button">
+    <div style={{
+      minHeight: '100vh',
+      background: '#000',
+      color: '#fff',
+      fontFamily: 'monospace',
+      padding: '2rem'
+    }}>
+      <header style={{ 
+        marginBottom: '3rem', 
+        display: 'flex', 
+        justifyContent: 'space-between',
+        alignItems: 'center'
+      }}>
+        <h1 style={{ letterSpacing: '0.2em' }}>SEEN ADMIN</h1>
+        <button 
+          onClick={() => setIsAuthenticated(false)}
+          style={{
+            padding: '0.5rem 1rem',
+            background: 'transparent',
+            border: '1px solid #666',
+            color: '#fff',
+            cursor: 'pointer'
+          }}
+        >
           LOGOUT
         </button>
       </header>
 
-      <div className="admin-content">
-        {error && <div className="alert alert-error">{error}</div>}
-        {success && <div className="alert alert-success">{success}</div>}
+      {message.text && (
+        <div style={{ 
+          padding: '1rem',
+          marginBottom: '2rem',
+          background: message.type === 'error' ? '#300' : message.type === 'info' ? '#036' : '#030',
+          border: `1px solid ${message.type === 'error' ? '#f44' : message.type === 'info' ? '#4af' : '#4f4'}`
+        }}>
+          {message.text}
+        </div>
+      )}
 
-        {/* Stats Section */}
-        {activeKeyword && (
-          <section className="admin-section stats-section">
-            <h2 className="section-title">Current Gallery Stats</h2>
-            <div className="stats-grid">
-              <div className="stat-card">
-                <div className="stat-label">Active Keyword</div>
-                <div className="stat-value">{activeKeyword.keyword}</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-label">NFTs Displayed</div>
-                <div className="stat-value">{stats.nftCount || '—'}</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-label">Contracts Searched</div>
-                <div className="stat-value">{settings.max_contracts || 500}</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-label">Last Activated</div>
-                <div className="stat-value">
-                  {activeKeyword.created_at ? new Date(activeKeyword.created_at).toLocaleDateString() : '—'}
+      {/* Active keyword info */}
+      {activeKeyword && (
+        <div style={{ 
+          padding: '1.5rem', 
+          marginBottom: '3rem', 
+          background: '#111',
+          border: '1px solid #333'
+        }}>
+          <div style={{ marginBottom: '0.5rem', color: '#888' }}>CURRENTLY ACTIVE:</div>
+          <div style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>{activeKeyword.keyword}</div>
+          <div style={{ display: 'flex', gap: '2rem', fontSize: '0.9rem', color: '#aaa' }}>
+            <div>Max NFTs: {settings.max_nfts || 50}</div>
+            <div>Max Contracts: {settings.max_contracts || 500}</div>
+          </div>
+        </div>
+      )}
+
+      {/* Add keyword */}
+      <section style={{ marginBottom: '3rem' }}>
+        <h2 style={{ marginBottom: '1rem' }}>ADD KEYWORD</h2>
+        <form onSubmit={addKeyword} style={{ display: 'flex', gap: '1rem' }}>
+          <input
+            type="text"
+            placeholder="e.g. photography, generative art"
+            value={newKeyword}
+            onChange={(e) => setNewKeyword(e.target.value)}
+            disabled={loading}
+            style={{
+              flex: 1,
+              padding: '0.75rem',
+              background: '#111',
+              border: '1px solid #333',
+              color: '#fff'
+            }}
+          />
+          <button 
+            type="submit" 
+            disabled={loading || !newKeyword.trim()}
+            style={{
+              padding: '0.75rem 2rem',
+              background: '#fff',
+              color: '#000',
+              border: 'none',
+              cursor: loading ? 'wait' : 'pointer',
+              fontWeight: 'bold',
+              opacity: loading || !newKeyword.trim() ? 0.5 : 1
+            }}
+          >
+            ADD
+          </button>
+        </form>
+      </section>
+
+      {/* Keywords list */}
+      <section style={{ marginBottom: '3rem' }}>
+        <h2 style={{ marginBottom: '1rem' }}>KEYWORDS ({keywords.length})</h2>
+        {keywords.length === 0 ? (
+          <div style={{ color: '#666', padding: '2rem', textAlign: 'center' }}>
+            No keywords yet. Add one above.
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            {keywords.map(kw => (
+              <div 
+                key={kw.id}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '1rem',
+                  background: kw.is_active ? '#113' : '#111',
+                  border: `1px solid ${kw.is_active ? '#4f4' : '#333'}`
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <span style={{ fontWeight: kw.is_active ? 'bold' : 'normal' }}>
+                    {kw.keyword}
+                  </span>
+                  {kw.is_active && (
+                    <span style={{ 
+                      fontSize: '0.75rem', 
+                      color: '#4f4',
+                      border: '1px solid #4f4',
+                      padding: '0.25rem 0.5rem'
+                    }}>
+                      ACTIVE
+                    </span>
+                  )}
+                </div>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <button
+                    onClick={() => activateKeyword(kw.id, kw.keyword)}
+                    disabled={loading}
+                    style={{
+                      padding: '0.5rem 1rem',
+                      background: kw.is_active ? '#4f4' : '#fff',
+                      color: '#000',
+                      border: 'none',
+                      cursor: loading ? 'wait' : 'pointer',
+                      fontWeight: 'bold'
+                    }}
+                  >
+                    {kw.is_active ? 'REFRESH' : 'ACTIVATE'}
+                  </button>
+                  <button
+                    onClick={() => deleteKeyword(kw.id, kw.keyword)}
+                    disabled={loading}
+                    style={{
+                      padding: '0.5rem 1rem',
+                      background: 'transparent',
+                      color: '#f44',
+                      border: '1px solid #f44',
+                      cursor: loading ? 'wait' : 'pointer'
+                    }}
+                  >
+                    DELETE
+                  </button>
                 </div>
               </div>
-            </div>
-          </section>
+            ))}
+          </div>
         )}
+      </section>
 
-        {/* Keywords Section */}
-        <section className="admin-section">
-          <h2 className="section-title">Keywords</h2>
-          
-          <form onSubmit={addKeyword} className="add-keyword-form">
+      {/* Settings */}
+      <section>
+        <h2 style={{ marginBottom: '1rem' }}>SETTINGS</h2>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+              <label>Max NFTs to Display</label>
+              <span style={{ color: '#4f4' }}>{settings.max_nfts || 50}</span>
+            </div>
             <input
-              type="text"
-              placeholder="NEW KEYWORD (e.g. 'generative art', 'photography')"
-              value={newKeyword}
-              onChange={(e) => setNewKeyword(e.target.value)}
-              className="keyword-input"
+              type="range"
+              min="10"
+              max="200"
+              step="10"
+              value={settings.max_nfts || 50}
+              onChange={(e) => updateSetting('max_nfts', e.target.value)}
+              style={{ width: '100%' }}
             />
-            <button type="submit" className="add-button" disabled={loading || !newKeyword.trim()}>
-              ADD KEYWORD
-            </button>
-          </form>
-
-          <div className="keywords-list">
-            {keywords.length === 0 ? (
-              <div className="empty-state">No keywords yet. Add one above to start curating.</div>
-            ) : (
-              keywords.map(keyword => (
-                <div key={keyword.id} className={`keyword-item ${keyword.is_active ? 'active' : ''}`}>
-                  <div className="keyword-info">
-                    <span className="keyword-name">{keyword.keyword}</span>
-                    {keyword.is_active && <span className="active-badge">ACTIVE</span>}
-                  </div>
-                  <div className="keyword-actions">
-                    <button
-                      onClick={() => activateKeyword(keyword.id)}
-                      disabled={loading}
-                      className={`activate-button ${keyword.is_active ? 'refresh' : ''}`}
-                    >
-                      {keyword.is_active ? 'REFRESH' : 'ACTIVATE'}
-                    </button>
-                    <button
-                      onClick={() => deleteKeyword(keyword.id)}
-                      disabled={loading}
-                      className="delete-button"
-                      title="Delete keyword"
-                    >
-                      ×
-                    </button>
-                  </div>
-                </div>
-              ))
-            )}
           </div>
-        </section>
 
-        {/* Settings Section */}
-        <section className="admin-section">
-          <h2 className="section-title">Gallery Settings</h2>
-          
-          <div className="settings-grid">
-            <div className="setting-item">
-              <label className="setting-label">
-                Max NFTs to Display
-                <span className="setting-value">{settings.max_nfts || 50}</span>
-              </label>
-              <input
-                type="range"
-                min="10"
-                max="200"
-                step="10"
-                value={settings.max_nfts || 50}
-                onChange={(e) => updateSettings('max_nfts', e.target.value)}
-                className="setting-slider"
-              />
-              <p className="setting-help">Number of NFTs to show in the gallery rotation</p>
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+              <label>Max Contracts to Search</label>
+              <span style={{ color: '#4f4' }}>{settings.max_contracts || 500}</span>
             </div>
-
-            <div className="setting-item">
-              <label className="setting-label">
-                Max Contracts to Search
-                <span className="setting-value">{settings.max_contracts || 500}</span>
-              </label>
-              <input
-                type="range"
-                min="10"
-                max="500"
-                step="10"
-                value={settings.max_contracts || 500}
-                onChange={(e) => updateSettings('max_contracts', e.target.value)}
-                className="setting-slider"
-              />
-              <p className="setting-help">More contracts = more variety (500 max for free tier)</p>
-            </div>
-
-            <div className="setting-item">
-              <label className="setting-label">
-                Auto-Rotation Hours
-                <span className="setting-value">{settings.rotation_hours || 24}h</span>
-              </label>
-              <input
-                type="range"
-                min="1"
-                max="168"
-                value={settings.rotation_hours || 24}
-                onChange={(e) => updateSettings('rotation_hours', e.target.value)}
-                className="setting-slider"
-              />
-              <p className="setting-help">How often to automatically refresh the gallery (if enabled)</p>
-            </div>
+            <input
+              type="range"
+              min="10"
+              max="500"
+              step="10"
+              value={settings.max_contracts || 500}
+              onChange={(e) => updateSetting('max_contracts', e.target.value)}
+              style={{ width: '100%' }}
+            />
           </div>
-        </section>
-      </div>
+
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+              <label>Auto-Rotation Hours</label>
+              <span style={{ color: '#4f4' }}>{settings.rotation_hours || 24}h</span>
+            </div>
+            <input
+              type="range"
+              min="1"
+              max="168"
+              value={settings.rotation_hours || 24}
+              onChange={(e) => updateSetting('rotation_hours', e.target.value)}
+              style={{ width: '100%' }}
+            />
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
