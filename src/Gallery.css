@@ -19,16 +19,21 @@ body {
   font-family: 'Archivo', -apple-system, sans-serif;
   background: var(--black);
   color: var(--white);
-  overflow-x: hidden;
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
 }
 
 .gallery {
-  position: relative;
-  min-height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2rem;
+  overflow: hidden;
 }
 
 .gallery-bg {
@@ -277,24 +282,29 @@ body {
 
 /* Empty State */
 .gallery-empty {
-  position: relative;
-  min-height: 100vh;
-  overflow-y: auto;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .gallery-empty .gallery-content {
   position: relative;
   width: 100%;
   max-width: 1600px;
-  margin: 0 auto;
-  padding: 10rem 2rem 20rem;
-  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .empty-container {
   width: 100%;
   max-width: 900px;
-  margin: 0 auto 4rem;
   display: flex;
   justify-content: center;
 }
@@ -367,35 +377,33 @@ body {
 /* Fullscreen Toggle Button */
 .fullscreen-toggle {
   position: fixed;
-  bottom: 16rem;
+  bottom: 2rem;
   right: 2rem;
-  background: rgba(0, 0, 0, 0.8);
+  width: 16px;
+  height: 16px;
+  background: transparent;
   border: 1px solid var(--gray);
-  color: var(--white);
-  padding: 0.75rem 1.25rem;
-  font-family: 'Antonio', sans-serif;
-  font-size: 0.75rem;
-  letter-spacing: 0.15em;
+  border-radius: 50%;
+  padding: 0;
   cursor: pointer;
   z-index: 101;
   transition: all 0.2s ease;
-  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Antonio', sans-serif;
+  font-size: 10px;
+  color: var(--gray);
 }
 
 .fullscreen-toggle:hover {
-  background: var(--white);
-  color: var(--black);
   border-color: var(--white);
+  color: var(--white);
 }
 
 .gallery.fullscreen .fullscreen-toggle {
-  bottom: 2rem;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.gallery.fullscreen:hover .fullscreen-toggle {
-  opacity: 1;
+  border-radius: 0;
+  font-size: 12px;
 }
 
 @keyframes pulse {
