@@ -51,7 +51,6 @@ export default function Gallery() {
 
   async function fetchCollectionInfo() {
     try {
-      // NEW: Use public endpoint instead of admin endpoint
       const response = await fetch(`${API_BASE}/collections`);
       const collections = await response.json();
       const activeCollection = collections.find(c => c.is_active);
@@ -114,7 +113,6 @@ export default function Gallery() {
       attempts++;
     }
     
-    // PRELOAD next image before transitioning
     const nextImage = new Image();
     nextImage.src = nfts[nextIndex]?.image_url;
     
@@ -129,7 +127,6 @@ export default function Gallery() {
       }, 400);
     };
     
-    // Fallback if image takes too long (1 second timeout)
     setTimeout(() => {
       if (!nextImage.complete) {
         nextImage.onload = null;
@@ -284,14 +281,14 @@ export default function Gallery() {
         <div className={`nft-info ${fade ? 'fade-in' : 'fade-out'}`}>
           <h2 className="nft-title">{currentNFT.title}</h2>
           <div className="nft-creator">{currentNFT.creator_name}</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.5rem' }}>
+          <div className="nft-meta">
             <div className="nft-counter">{currentIndex + 1} of {nfts.length}</div>
             {currentNFT.chain && (
               <span className="chain-badge">
                 {currentNFT.chain}
               </span>
             )}
-            <span className="mode-badge" data-mode={galleryMode}>
+            <span className={`mode-badge ${galleryMode === 'curated' ? 'curated' : ''}`}>
               {galleryMode === 'curated' ? 'CURATED' : 'RANDOM'}
             </span>
           </div>
