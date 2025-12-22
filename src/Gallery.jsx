@@ -196,7 +196,22 @@ export default function Gallery() {
 
         <div className={`nft-info ${fade ? 'fade-in' : 'fade-out'}`}>
           <h2 className="nft-title">{currentNFT.title}</h2>
-          <div className="nft-creator">{currentNFT.creator_name}</div>
+          <div className="nft-creator">
+            {currentNFT.creator_name}
+            {currentNFT.chain && (
+              <span style={{
+                marginLeft: '1rem',
+                padding: '0.25rem 0.5rem',
+                background: '#333',
+                color: '#aaa',
+                fontSize: '0.75rem',
+                borderRadius: '3px',
+                textTransform: 'uppercase'
+              }}>
+                {currentNFT.chain}
+              </span>
+            )}
+          </div>
           <div className="nft-counter">{currentIndex + 1} of {nfts.length}</div>
         </div>
 
