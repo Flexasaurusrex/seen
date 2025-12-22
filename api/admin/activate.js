@@ -1,9 +1,14 @@
 import { sql } from '@vercel/postgres';
 import { Alchemy, Network } from 'alchemy-sdk';
 
-const alchemy = new Alchemy({
+const alchemyEth = new Alchemy({
   apiKey: process.env.ALCHEMY_API_KEY,
   network: Network.ETH_MAINNET,
+});
+
+const alchemyBase = new Alchemy({
+  apiKey: process.env.ALCHEMY_API_KEY,
+  network: Network.BASE_MAINNET,
 });
 
 function checkAuth(req) {
@@ -16,17 +21,32 @@ function checkAuth(req) {
 
 async function buildGalleryNFTs(keyword) {
   try {
-    const searchResults = await alchemy.nft.searchContractMetadata(keyword);
-    const contracts = Array.isArray(searchResults) ? searchResults : (searchResults.contracts || []);
+    // Search BOTH Ethereum and Base
+    const [ethResults, baseResults] = await Promise.all([
+      alchemyEth.nft.searchContractMetadata(keyword),
+      alchemyBase.nft.searchContractMetadata(keyword)
+    ]);
     
-    if (contracts.length === 0) return [];
+    const ethContracts = Array.isArray(ethResults) ? ethResults : (ethResults.contracts || []);
+    const baseContracts = Array.isArray(baseResults) ? baseResults : (baseResults.contracts || []);
+    
+    // Tag contracts with their chain and alchemy instance
+    const allContracts = [
+      ...ethContracts.map(c => ({ ...c, chain: 'ethereum', alchemy: alchemyEth })),
+      ...baseContracts.map(c => ({ ...c, chain: 'base', alchemy: alchemyBase }))
+    ];
+    
+    // Shuffle to mix both chains
+    allContracts.sort(() => Math.random() - 0.5);
+    
+    if (allContracts.length === 0) return [];
     
     const nfts = [];
     const MAX_NFTS = 100;
     const MAX_CONTRACTS = 500;
-    const contractsToSearch = Math.min(contracts.length, MAX_CONTRACTS);
+    const contractsToSearch = Math.min(allContracts.length, MAX_CONTRACTS);
     
-    console.log(`Searching ${contractsToSearch} contracts for ${keyword}...`);
+    console.log(`Searching ${contractsToSearch} contracts (ETH: ${ethContracts.length}, Base: ${baseContracts.length}) for ${keyword}...`);
     
     for (let i = 0; i < contractsToSearch; i++) {
       if (nfts.length >= MAX_NFTS) {
@@ -34,10 +54,10 @@ async function buildGalleryNFTs(keyword) {
         break;
       }
       
-      const contract = contracts[i];
+      const contract = allContracts[i];
       
       try {
-        const nftsForContract = await alchemy.nft.getNftsForContract(contract.address, {
+        const nftsForContract = await contract.alchemy.nft.getNftsForContract(contract.address, {
           pageSize: 5
         });
 
@@ -47,14 +67,19 @@ async function buildGalleryNFTs(keyword) {
           const image = nft.image?.cachedUrl || nft.image?.originalUrl || nft.raw?.metadata?.image;
           
           if (image && (image.startsWith('http://') || image.startsWith('https://'))) {
+            // Build OpenSea URL based on chain
+            const openseaChain = contract.chain === 'base' ? 'base' : 'ethereum';
+            const openseaUrl = `https://opensea.io/assets/${openseaChain}/${nft.contract.address}/${nft.tokenId}`;
+            
             nfts.push({
               contractAddress: nft.contract.address,
               tokenId: nft.tokenId,
               title: nft.name || nft.contract.name || 'Untitled',
               description: nft.description || '',
               image,
-              externalUrl: nft.raw?.metadata?.external_url || `https://opensea.io/assets/ethereum/${nft.contract.address}/${nft.tokenId}`,
-              creatorName: nft.contract.name || 'Unknown Artist'
+              externalUrl: nft.raw?.metadata?.external_url || openseaUrl,
+              creatorName: nft.contract.name || 'Unknown Artist',
+              chain: contract.chain
             });
           }
         }
@@ -110,10 +135,10 @@ export default async function handler(req, res) {
       await sql`
         INSERT INTO nft_cache (
           keyword_id, contract_address, token_id, title, description,
-          image_url, external_url, creator_name
+          image_url, external_url, creator_name, chain
         ) VALUES (
           ${id}, ${nft.contractAddress}, ${nft.tokenId}, ${nft.title},
-          ${nft.description}, ${nft.image}, ${nft.externalUrl}, ${nft.creatorName}
+          ${nft.description}, ${nft.image}, ${nft.externalUrl}, ${nft.creatorName}, ${nft.chain}
         )
       `;
     }
