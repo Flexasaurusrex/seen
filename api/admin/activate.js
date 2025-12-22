@@ -60,19 +60,19 @@ async function buildGalleryNFTs(keyword) {
             });
           }
         }
-        
-        // Aggressive delay after every contract to avoid rate limits
-        await delay(100);
-        
-        // Log progress every 50 contracts
-        if (i % 50 === 0 && i > 0) {
-          console.log(`Processed ${i} contracts, found ${nfts.length} NFTs so far...`);
-        }
       } catch (err) {
         console.error(`Contract ${i} error:`, err.message);
-        // Still delay even on error to avoid hammering API
-        await delay(100);
         continue;
+      }
+      
+      // Delay every 10 contracts only
+      if (i % 10 === 0 && i > 0) {
+        await delay(100);
+      }
+      
+      // Log progress every 50 contracts
+      if (i % 50 === 0 && i > 0) {
+        console.log(`Processed ${i} contracts, found ${nfts.length} NFTs so far...`);
       }
     }
     
@@ -101,7 +101,7 @@ export default async function handler(req, res) {
     const { id } = req.body;
     if (!id) return res.status(400).json({ error: 'Missing keyword ID' });
     
-    await sql`UPDATE keywords SET is_active = false`;
+    // Set this keyword as active (don't deactivate others)
     const keyword = await sql`UPDATE keywords SET is_active = true WHERE id = ${id} RETURNING *`;
     
     if (keyword.rows.length === 0) {
@@ -110,6 +110,7 @@ export default async function handler(req, res) {
 
     const nfts = await buildGalleryNFTs(keyword.rows[0].keyword);
     
+    // Delete existing NFTs for this keyword only
     await sql`DELETE FROM nft_cache WHERE keyword_id = ${id}`;
     
     for (const nft of nfts) {
