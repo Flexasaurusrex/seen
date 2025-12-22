@@ -11,6 +11,7 @@ export default function Gallery() {
   const [fade, setFade] = useState(true);
   const [fullscreen, setFullscreen] = useState(false);
   const [isPlaying, setIsPlaying] = useState(true);
+  const [brokenImages, setBrokenImages] = useState(new Set());
 
   // Fetch gallery data
   useEffect(() => {
@@ -97,7 +98,13 @@ export default function Gallery() {
     setFade(false);
     setTimeout(() => {
       setCurrentIndex((prev) => {
-        const next = (prev + 1) % nfts.length;
+        // Find next non-broken image
+        let next = (prev + 1) % nfts.length;
+        let attempts = 0;
+        while (brokenImages.has(nfts[next]?.image_url) && attempts < nfts.length) {
+          next = (next + 1) % nfts.length;
+          attempts++;
+        }
         if (nfts[next]) {
           trackView(nfts[next].id);
         }
@@ -111,7 +118,13 @@ export default function Gallery() {
     setFade(false);
     setTimeout(() => {
       setCurrentIndex((prev) => {
-        const next = (prev - 1 + nfts.length) % nfts.length;
+        // Find previous non-broken image
+        let next = (prev - 1 + nfts.length) % nfts.length;
+        let attempts = 0;
+        while (brokenImages.has(nfts[next]?.image_url) && attempts < nfts.length) {
+          next = (next - 1 + nfts.length) % nfts.length;
+          attempts++;
+        }
         if (nfts[next]) {
           trackView(nfts[next].id);
         }
@@ -191,9 +204,13 @@ export default function Gallery() {
               alt={currentNFT.title}
               className="nft-image"
               onError={() => {
-                // If image fails to load, skip to next NFT
-                console.warn('Image failed to load, skipping to next');
-                goToNext();
+                // Mark this image as broken and skip to next
+                const imageUrl = currentNFT.image_url;
+                if (!brokenImages.has(imageUrl)) {
+                  console.warn('Image failed to load:', imageUrl);
+                  setBrokenImages(prev => new Set([...prev, imageUrl]));
+                  goToNext();
+                }
               }}
             />
           </div>
