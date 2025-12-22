@@ -14,6 +14,8 @@ function checkAuth(req) {
   return username === process.env.ADMIN_USERNAME && password === process.env.ADMIN_PASSWORD;
 }
 
+const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
 async function buildGalleryNFTs(keyword) {
   try {
     const searchResults = await alchemy.nft.searchContractMetadata(keyword);
@@ -26,8 +28,10 @@ async function buildGalleryNFTs(keyword) {
     const MAX_CONTRACTS = 500;
     const contractsToSearch = Math.min(contracts.length, MAX_CONTRACTS);
     
-    for (const contract of contracts.slice(0, contractsToSearch)) {
+    for (let i = 0; i < contractsToSearch; i++) {
       if (nfts.length >= MAX_NFTS) break;
+      
+      const contract = contracts[i];
       
       try {
         const nftsForContract = await alchemy.nft.getNftsForContract(contract.address, {
@@ -51,7 +55,13 @@ async function buildGalleryNFTs(keyword) {
             });
           }
         }
+        
+        // Add small delay every 10 contracts to avoid rate limits
+        if (i % 10 === 0 && i > 0) {
+          await delay(100);
+        }
       } catch (err) {
+        console.error('Contract error:', err);
         continue;
       }
     }
