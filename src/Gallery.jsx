@@ -51,8 +51,12 @@ export default function Gallery() {
           }
           return next;
         });
-        setFade(true);
-      }, 600);
+        
+        // Tiny delay before fading back in
+        setTimeout(() => {
+          setFade(true);
+        }, 50);
+      }, 400);
     }, 8000); // Change every 8 seconds
 
     return () => clearInterval(interval);
