@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import './Gallery.css';
 
 const API_BASE = '/api';
@@ -10,7 +10,6 @@ export default function Gallery() {
   const [loading, setLoading] = useState(true);
   const [fade, setFade] = useState(true);
   const [fullscreen, setFullscreen] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(true);
   const [brokenImages, setBrokenImages] = useState(new Set());
   const [galleryMode, setGalleryMode] = useState('random');
   
@@ -33,10 +32,9 @@ export default function Gallery() {
       setCurrentIndex(0);
       setLoading(false);
       
-      // If curated mode and we have collections, fetch collection info
       if (galleryMode === 'curated' && data.collections) {
         fetchCollectionInfo();
-        setShowModal(true); // Auto-open modal
+        setShowModal(true);
       } else {
         setShowModal(false);
         setCollectionInfo(null);
@@ -63,6 +61,16 @@ export default function Gallery() {
       console.error('Error fetching collection info:', error);
     }
   }
+
+  useEffect(() => {
+    if (nfts.length === 0) return;
+
+    const interval = setInterval(() => {
+      goToNext();
+    }, 8000);
+
+    return () => clearInterval(interval);
+  }, [nfts, currentIndex, brokenImages]);
 
   async function trackView(nftId) {
     try {
@@ -95,7 +103,7 @@ export default function Gallery() {
     }
   }
 
-  const goToNext = useCallback(() => {
+  function goToNext() {
     if (nfts.length === 0) return;
     
     let nextIndex = (currentIndex + 1) % nfts.length;
@@ -105,83 +113,15 @@ export default function Gallery() {
       attempts++;
     }
     
-    const nextImage = new Image();
-    nextImage.src = nfts[nextIndex]?.image_url;
-    
-    nextImage.onload = () => {
-      setFade(false);
-      setTimeout(() => {
-        setCurrentIndex(nextIndex);
-        if (nfts[nextIndex]) {
-          trackView(nfts[nextIndex].id);
-        }
-        setTimeout(() => setFade(true), 50);
-      }, 400);
-    };
-    
+    setFade(false);
     setTimeout(() => {
-      if (!nextImage.complete) {
-        nextImage.onload = null;
-        setFade(false);
-        setTimeout(() => {
-          setCurrentIndex(nextIndex);
-          if (nfts[nextIndex]) {
-            trackView(nfts[nextIndex].id);
-          }
-          setTimeout(() => setFade(true), 50);
-        }, 400);
+      setCurrentIndex(nextIndex);
+      if (nfts[nextIndex]) {
+        trackView(nfts[nextIndex].id);
       }
-    }, 1000);
-  }, [nfts, currentIndex, brokenImages]);
-
-  const goToPrevious = useCallback(() => {
-    if (nfts.length === 0) return;
-    
-    let prevIndex = (currentIndex - 1 + nfts.length) % nfts.length;
-    let attempts = 0;
-    while (brokenImages.has(nfts[prevIndex]?.image_url) && attempts < nfts.length) {
-      prevIndex = (prevIndex - 1 + nfts.length) % nfts.length;
-      attempts++;
-    }
-    
-    const prevImage = new Image();
-    prevImage.src = nfts[prevIndex]?.image_url;
-    
-    prevImage.onload = () => {
-      setFade(false);
-      setTimeout(() => {
-        setCurrentIndex(prevIndex);
-        if (nfts[prevIndex]) {
-          trackView(nfts[prevIndex].id);
-        }
-        setTimeout(() => setFade(true), 50);
-      }, 400);
-    };
-    
-    setTimeout(() => {
-      if (!prevImage.complete) {
-        prevImage.onload = null;
-        setFade(false);
-        setTimeout(() => {
-          setCurrentIndex(prevIndex);
-          if (nfts[prevIndex]) {
-            trackView(nfts[prevIndex].id);
-          }
-          setTimeout(() => setFade(true), 50);
-        }, 400);
-      }
-    }, 1000);
-  }, [nfts, currentIndex, brokenImages]);
-
-  useEffect(() => {
-    if (nfts.length === 0 || !isPlaying) return;
-
-    const interval = setInterval(() => {
-      goToNext();
-    }, 8000);
-
-    return () => clearInterval(interval);
-  }, [nfts, isPlaying, goToNext]);
+      setTimeout(() => setFade(true), 50);
+    }, 400);
+  }
 
   if (loading) {
     return (
@@ -246,7 +186,6 @@ export default function Gallery() {
     <div className={`gallery ${fullscreen ? 'fullscreen' : ''}`}>
       <div className="gallery-bg"></div>
       
-      {/* Collection Info Modal */}
       {showModal && collectionInfo && (
         <>
           <div className="modal-overlay" onClick={() => setShowModal(false)} />
@@ -264,7 +203,6 @@ export default function Gallery() {
         </>
       )}
 
-      {/* Info Button - Shows when modal is closed in curated mode */}
       {galleryMode === 'curated' && !showModal && collectionInfo && (
         <button 
           className="collection-info-button"
@@ -352,18 +290,6 @@ export default function Gallery() {
               {galleryMode === 'curated' ? 'CURATED' : 'RANDOM'}
             </span>
           </div>
-        </div>
-
-        <div className="gallery-controls">
-          <button onClick={goToPrevious} className="control-button" title="Previous">
-            ‹
-          </button>
-          <button onClick={() => setIsPlaying(!isPlaying)} className="control-button" title={isPlaying ? 'Pause' : 'Play'}>
-            {isPlaying ? '❚❚' : '▶'}
-          </button>
-          <button onClick={goToNext} className="control-button" title="Next">
-            ›
-          </button>
         </div>
 
         <button 
