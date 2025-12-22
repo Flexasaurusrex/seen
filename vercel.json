@@ -2,7 +2,18 @@
   "buildCommand": "npm install && npm run build",
   "outputDirectory": "dist",
   "framework": null,
-  "rewrites": [
-    { "source": "/api/:path*", "destination": "/api/:path*" }
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/index.js"
+    },
+    {
+      "src": "/(.*\\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot))",
+      "dest": "/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
   ]
 }
