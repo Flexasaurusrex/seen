@@ -91,6 +91,50 @@ body {
   color: var(--gray-light);
 }
 
+/* Mode Toggle */
+.mode-toggle {
+  position: absolute;
+  top: 6rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0;
+  background: #000;
+  border: 1px solid #333;
+  border-radius: 4px;
+  overflow: hidden;
+  z-index: 100;
+}
+
+.mode-button {
+  padding: 0.5rem 1.5rem;
+  background: transparent;
+  color: #666;
+  border: none;
+  font-family: 'Antonio', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-right: 1px solid #333;
+}
+
+.mode-button:last-child {
+  border-right: none;
+}
+
+.mode-button:hover {
+  background: #111;
+  color: #fff;
+}
+
+.mode-button.active {
+  background: #fff;
+  color: #000;
+  font-weight: 700;
+}
+
 /* Hero Section - Art is King */
 .nft-hero {
   position: fixed;
@@ -285,7 +329,8 @@ body {
 .gallery.fullscreen .gallery-header,
 .gallery.fullscreen .gallery-footer,
 .gallery.fullscreen .gallery-controls,
-.gallery.fullscreen .nft-info {
+.gallery.fullscreen .nft-info,
+.gallery.fullscreen .mode-toggle {
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.3s ease;
@@ -374,6 +419,15 @@ body {
     padding: 1.5rem 2rem;
   }
 
+  .mode-toggle {
+    top: 5rem;
+  }
+
+  .mode-button {
+    padding: 0.4rem 1rem;
+    font-size: 0.8rem;
+  }
+
   .nft-hero {
     padding: 0 2rem;
   }
@@ -399,7 +453,8 @@ body {
   .nft-info,
   .nft-image,
   .control-button,
-  .fullscreen-toggle {
+  .fullscreen-toggle,
+  .mode-button {
     transition: none;
   }
   
