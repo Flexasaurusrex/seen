@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import './Gallery.css';
 
 const API_BASE = '/api';
@@ -64,16 +64,6 @@ export default function Gallery() {
     }
   }
 
-  useEffect(() => {
-    if (nfts.length === 0 || !isPlaying) return;
-
-    const interval = setInterval(() => {
-      goToNext();
-    }, 8000);
-
-    return () => clearInterval(interval);
-  }, [nfts, isPlaying, currentIndex, brokenImages]);
-
   async function trackView(nftId) {
     try {
       await fetch(`${API_BASE}/analytics/view`, {
@@ -105,7 +95,9 @@ export default function Gallery() {
     }
   }
 
-  function goToNext() {
+  const goToNext = useCallback(() => {
+    if (nfts.length === 0) return;
+    
     let nextIndex = (currentIndex + 1) % nfts.length;
     let attempts = 0;
     while (brokenImages.has(nfts[nextIndex]?.image_url) && attempts < nfts.length) {
@@ -140,9 +132,11 @@ export default function Gallery() {
         }, 400);
       }
     }, 1000);
-  }
+  }, [nfts, currentIndex, brokenImages]);
 
-  function goToPrevious() {
+  const goToPrevious = useCallback(() => {
+    if (nfts.length === 0) return;
+    
     let prevIndex = (currentIndex - 1 + nfts.length) % nfts.length;
     let attempts = 0;
     while (brokenImages.has(nfts[prevIndex]?.image_url) && attempts < nfts.length) {
@@ -177,7 +171,17 @@ export default function Gallery() {
         }, 400);
       }
     }, 1000);
-  }
+  }, [nfts, currentIndex, brokenImages]);
+
+  useEffect(() => {
+    if (nfts.length === 0 || !isPlaying) return;
+
+    const interval = setInterval(() => {
+      goToNext();
+    }, 8000);
+
+    return () => clearInterval(interval);
+  }, [nfts, isPlaying, goToNext]);
 
   if (loading) {
     return (
