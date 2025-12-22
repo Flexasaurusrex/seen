@@ -40,7 +40,7 @@ async function buildGalleryNFTs(keyword) {
       
       try {
         const nftsForContract = await alchemy.nft.getNftsForContract(contract.address, {
-          pageSize: 3
+          pageSize: 5
         });
 
         for (const nft of nftsForContract.nfts || []) {
@@ -62,7 +62,7 @@ async function buildGalleryNFTs(keyword) {
         }
         
         // Aggressive delay after every contract to avoid rate limits
-        await delay(33);
+        await delay(100);
         
         // Log progress every 50 contracts
         if (i % 50 === 0 && i > 0) {
