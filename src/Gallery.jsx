@@ -113,14 +113,35 @@ export default function Gallery() {
       attempts++;
     }
     
-    setFade(false);
+    // PRELOAD next image before transitioning
+    const nextImage = new Image();
+    nextImage.src = nfts[nextIndex]?.image_url;
+    
+    nextImage.onload = () => {
+      setFade(false);
+      setTimeout(() => {
+        setCurrentIndex(nextIndex);
+        if (nfts[nextIndex]) {
+          trackView(nfts[nextIndex].id);
+        }
+        setTimeout(() => setFade(true), 50);
+      }, 400);
+    };
+    
+    // Fallback if image takes too long (1 second timeout)
     setTimeout(() => {
-      setCurrentIndex(nextIndex);
-      if (nfts[nextIndex]) {
-        trackView(nfts[nextIndex].id);
+      if (!nextImage.complete) {
+        nextImage.onload = null;
+        setFade(false);
+        setTimeout(() => {
+          setCurrentIndex(nextIndex);
+          if (nfts[nextIndex]) {
+            trackView(nfts[nextIndex].id);
+          }
+          setTimeout(() => setFade(true), 50);
+        }, 400);
       }
-      setTimeout(() => setFade(true), 50);
-    }, 400);
+    }, 1000);
   }
 
   if (loading) {
