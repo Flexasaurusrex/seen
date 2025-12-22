@@ -102,13 +102,17 @@ body {
 
 /* Hero Section - Main Gallery */
 .nft-hero {
-  flex: 1;
+  position: fixed;
+  top: 8rem;
+  left: 0;
+  right: 0;
+  bottom: 20rem;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-  padding: 8rem 3rem 14rem;
+  padding: 0 3rem;
 }
 
 .nft-hero.fade-in {
@@ -145,16 +149,20 @@ body {
   transform: scale(1.01);
 }
 
-/* NFT Info - Clean Overlay */
+/* NFT Info - Dedicated Space Below Image */
 .nft-info {
   position: fixed;
-  bottom: 10rem;
+  bottom: 13rem;
   left: 50%;
   transform: translateX(-50%);
   text-align: center;
   transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 90;
   max-width: 80%;
+  padding: 1.5rem 2rem;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--gray-dark);
 }
 
 .nft-info.fade-in {
@@ -266,9 +274,14 @@ body {
   bottom: 0;
   left: 0;
   width: 100%;
-  padding: 1.5rem 3rem;
+  height: 11rem;
+  padding: 2rem 3rem;
   z-index: 100;
-  background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.8) 50%, transparent 100%);
+  background: rgba(0, 0, 0, 0.95);
+  border-top: 1px solid var(--gray-dark);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .footer-manifesto {
