@@ -15,36 +15,50 @@ function checkAuth(req) {
 }
 
 async function buildGalleryNFTs(keyword, maxNfts = 50) {
-  const searchResults = await alchemy.nft.searchContractMetadata(keyword);
-  const nfts = [];
-  
-  for (const contract of searchResults.slice(0, 10)) {
-    try {
-      const nftsForContract = await alchemy.nft.getNftsForContract(contract.address, {
-        pageSize: Math.ceil(maxNfts / 10)
-      });
-
-      for (const nft of nftsForContract.nfts) {
-        if (nfts.length >= maxNfts) break;
-        const image = nft.image?.cachedUrl || nft.image?.originalUrl || nft.raw?.metadata?.image;
-        if (image) {
-          nfts.push({
-            contractAddress: nft.contract.address,
-            tokenId: nft.tokenId,
-            title: nft.name || nft.contract.name || 'Untitled',
-            description: nft.description || '',
-            image,
-            externalUrl: nft.raw?.metadata?.external_url || `https://opensea.io/assets/ethereum/${nft.contract.address}/${nft.tokenId}`,
-            creatorName: nft.contract.name || 'Unknown Artist'
-          });
-        }
-      }
-      if (nfts.length >= maxNfts) break;
-    } catch (err) {
-      continue;
+  try {
+    const searchResults = await alchemy.nft.searchContractMetadata(keyword);
+    
+    // searchResults might be an object with .contracts array
+    const contracts = Array.isArray(searchResults) ? searchResults : (searchResults.contracts || []);
+    
+    if (contracts.length === 0) {
+      return [];
     }
+    
+    const nfts = [];
+    
+    for (const contract of contracts.slice(0, 10)) {
+      try {
+        const nftsForContract = await alchemy.nft.getNftsForContract(contract.address, {
+          pageSize: Math.ceil(maxNfts / 10)
+        });
+
+        for (const nft of nftsForContract.nfts || []) {
+          if (nfts.length >= maxNfts) break;
+          const image = nft.image?.cachedUrl || nft.image?.originalUrl || nft.raw?.metadata?.image;
+          if (image) {
+            nfts.push({
+              contractAddress: nft.contract.address,
+              tokenId: nft.tokenId,
+              title: nft.name || nft.contract.name || 'Untitled',
+              description: nft.description || '',
+              image,
+              externalUrl: nft.raw?.metadata?.external_url || `https://opensea.io/assets/ethereum/${nft.contract.address}/${nft.tokenId}`,
+              creatorName: nft.contract.name || 'Unknown Artist'
+            });
+          }
+        }
+        if (nfts.length >= maxNfts) break;
+      } catch (err) {
+        console.error('Contract fetch error:', err);
+        continue;
+      }
+    }
+    return nfts;
+  } catch (error) {
+    console.error('Search error:', error);
+    return [];
   }
-  return nfts;
 }
 
 export default async function handler(req, res) {
