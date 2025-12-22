@@ -43,7 +43,7 @@ export default function Gallery() {
     }, 8000);
 
     return () => clearInterval(interval);
-  }, [nfts, isPlaying]);
+  }, [nfts, isPlaying, currentIndex, brokenImages]);
 
   async function trackView(nftId) {
     try {
@@ -77,49 +77,93 @@ export default function Gallery() {
   }
 
   function goToNext() {
-    setFade(false);
+    // Calculate next index first
+    let nextIndex = (currentIndex + 1) % nfts.length;
+    let attempts = 0;
+    while (brokenImages.has(nfts[nextIndex]?.image_url) && attempts < nfts.length) {
+      nextIndex = (nextIndex + 1) % nfts.length;
+      attempts++;
+    }
     
-    setTimeout(() => {
-      setCurrentIndex((prev) => {
-        let next = (prev + 1) % nfts.length;
-        let attempts = 0;
-        while (brokenImages.has(nfts[next]?.image_url) && attempts < nfts.length) {
-          next = (next + 1) % nfts.length;
-          attempts++;
-        }
-        if (nfts[next]) {
-          trackView(nfts[next].id);
-        }
-        return next;
-      });
+    // Preload next image
+    const nextImage = new Image();
+    nextImage.src = nfts[nextIndex]?.image_url;
+    
+    nextImage.onload = () => {
+      // Now start transition
+      setFade(false);
       
       setTimeout(() => {
-        setFade(true);
-      }, 50);
-    }, 450);
+        setCurrentIndex(nextIndex);
+        if (nfts[nextIndex]) {
+          trackView(nfts[nextIndex].id);
+        }
+        
+        setTimeout(() => {
+          setFade(true);
+        }, 50);
+      }, 400);
+    };
+    
+    // If image fails to load or takes too long, proceed anyway
+    setTimeout(() => {
+      if (!nextImage.complete) {
+        nextImage.onload = null;
+        setFade(false);
+        setTimeout(() => {
+          setCurrentIndex(nextIndex);
+          if (nfts[nextIndex]) {
+            trackView(nfts[nextIndex].id);
+          }
+          setTimeout(() => setFade(true), 50);
+        }, 400);
+      }
+    }, 1000);
   }
 
   function goToPrevious() {
-    setFade(false);
+    // Calculate previous index first
+    let prevIndex = (currentIndex - 1 + nfts.length) % nfts.length;
+    let attempts = 0;
+    while (brokenImages.has(nfts[prevIndex]?.image_url) && attempts < nfts.length) {
+      prevIndex = (prevIndex - 1 + nfts.length) % nfts.length;
+      attempts++;
+    }
     
-    setTimeout(() => {
-      setCurrentIndex((prev) => {
-        let next = (prev - 1 + nfts.length) % nfts.length;
-        let attempts = 0;
-        while (brokenImages.has(nfts[next]?.image_url) && attempts < nfts.length) {
-          next = (next - 1 + nfts.length) % nfts.length;
-          attempts++;
-        }
-        if (nfts[next]) {
-          trackView(nfts[next].id);
-        }
-        return next;
-      });
+    // Preload previous image
+    const prevImage = new Image();
+    prevImage.src = nfts[prevIndex]?.image_url;
+    
+    prevImage.onload = () => {
+      // Now start transition
+      setFade(false);
       
       setTimeout(() => {
-        setFade(true);
-      }, 50);
-    }, 450);
+        setCurrentIndex(prevIndex);
+        if (nfts[prevIndex]) {
+          trackView(nfts[prevIndex].id);
+        }
+        
+        setTimeout(() => {
+          setFade(true);
+        }, 50);
+      }, 400);
+    };
+    
+    // If image fails to load or takes too long, proceed anyway
+    setTimeout(() => {
+      if (!prevImage.complete) {
+        prevImage.onload = null;
+        setFade(false);
+        setTimeout(() => {
+          setCurrentIndex(prevIndex);
+          if (nfts[prevIndex]) {
+            trackView(nfts[prevIndex].id);
+          }
+          setTimeout(() => setFade(true), 50);
+        }, 400);
+      }
+    }, 1000);
   }
 
   if (loading) {
