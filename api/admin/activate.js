@@ -14,28 +14,28 @@ function checkAuth(req) {
   return username === process.env.ADMIN_USERNAME && password === process.env.ADMIN_PASSWORD;
 }
 
-async function buildGalleryNFTs(keyword, maxNfts = 200, maxContracts = 500) {
+async function buildGalleryNFTs(keyword) {
   try {
     const searchResults = await alchemy.nft.searchContractMetadata(keyword);
-    
     const contracts = Array.isArray(searchResults) ? searchResults : (searchResults.contracts || []);
     
-    if (contracts.length === 0) {
-      return [];
-    }
+    if (contracts.length === 0) return [];
     
     const nfts = [];
-    const contractsToSearch = Math.min(contracts.length, maxContracts);
-    const nftsPerContract = Math.max(1, Math.ceil(maxNfts / contractsToSearch));
+    const MAX_NFTS = 200;
+    const MAX_CONTRACTS = 500;
+    const contractsToSearch = Math.min(contracts.length, MAX_CONTRACTS);
     
     for (const contract of contracts.slice(0, contractsToSearch)) {
+      if (nfts.length >= MAX_NFTS) break;
+      
       try {
         const nftsForContract = await alchemy.nft.getNftsForContract(contract.address, {
-          pageSize: nftsPerContract
+          pageSize: 5
         });
 
         for (const nft of nftsForContract.nfts || []) {
-          if (nfts.length >= maxNfts) break;
+          if (nfts.length >= MAX_NFTS) break;
           
           const image = nft.image?.cachedUrl || nft.image?.originalUrl || nft.raw?.metadata?.image;
           
@@ -51,9 +51,7 @@ async function buildGalleryNFTs(keyword, maxNfts = 200, maxContracts = 500) {
             });
           }
         }
-        if (nfts.length >= maxNfts) break;
       } catch (err) {
-        console.error('Contract fetch error:', err);
         continue;
       }
     }
@@ -79,10 +77,7 @@ export default async function handler(req, res) {
 
   try {
     const { id } = req.body;
-    
-    if (!id) {
-      return res.status(400).json({ error: 'Missing keyword ID' });
-    }
+    if (!id) return res.status(400).json({ error: 'Missing keyword ID' });
     
     await sql`UPDATE keywords SET is_active = false`;
     const keyword = await sql`UPDATE keywords SET is_active = true WHERE id = ${id} RETURNING *`;
@@ -91,7 +86,7 @@ export default async function handler(req, res) {
       return res.status(404).json({ error: 'Keyword not found' });
     }
 
-    const nfts = await buildGalleryNFTs(keyword.rows[0].keyword, 200, 500);
+    const nfts = await buildGalleryNFTs(keyword.rows[0].keyword);
     
     await sql`DELETE FROM nft_cache WHERE keyword_id = ${id}`;
     
@@ -106,8 +101,6 @@ export default async function handler(req, res) {
         )
       `;
     }
-
-    await sql`UPDATE settings SET value = NOW()::TEXT WHERE key = 'last_rotation'`;
 
     return res.json({ success: true, keyword: keyword.rows[0], nftCount: nfts.length });
   } catch (error) {
