@@ -14,7 +14,7 @@ function checkAuth(req) {
   return username === process.env.ADMIN_USERNAME && password === process.env.ADMIN_PASSWORD;
 }
 
-async function buildGalleryNFTs(keyword, maxNfts = 50, maxContracts = 500) {
+async function buildGalleryNFTs(keyword, maxNfts = 200, maxContracts = 500) {
   try {
     const searchResults = await alchemy.nft.searchContractMetadata(keyword);
     
@@ -39,7 +39,6 @@ async function buildGalleryNFTs(keyword, maxNfts = 50, maxContracts = 500) {
           
           const image = nft.image?.cachedUrl || nft.image?.originalUrl || nft.raw?.metadata?.image;
           
-          // Only include NFTs with valid HTTP(S) image URLs
           if (image && (image.startsWith('http://') || image.startsWith('https://'))) {
             nfts.push({
               contractAddress: nft.contract.address,
@@ -92,11 +91,7 @@ export default async function handler(req, res) {
       return res.status(404).json({ error: 'Keyword not found' });
     }
 
-    const settings = await sql`SELECT * FROM settings`;
-    const maxNfts = parseInt(settings.rows.find(s => s.key === 'max_nfts')?.value || '50');
-    const maxContracts = parseInt(settings.rows.find(s => s.key === 'max_contracts')?.value || '500');
-    
-    const nfts = await buildGalleryNFTs(keyword.rows[0].keyword, maxNfts, maxContracts);
+    const nfts = await buildGalleryNFTs(keyword.rows[0].keyword, 200, 500);
     
     await sql`DELETE FROM nft_cache WHERE keyword_id = ${id}`;
     
