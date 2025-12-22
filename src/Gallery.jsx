@@ -43,7 +43,7 @@ export default function Gallery() {
     }, 8000);
 
     return () => clearInterval(interval);
-  }, [nfts, isPlaying, currentIndex, brokenImages]);
+  }, [nfts, isPlaying]);
 
   async function trackView(nftId) {
     try {
