@@ -13,50 +13,31 @@ const alchemyBase = new Alchemy({
 
 function isScamNFT(nft) {
   const title = (nft.title || '').toLowerCase();
-  const description = (nft.description || '').toLowerCase();
   const titleOriginal = nft.title || '';
   
-  // Only flag if MULTIPLE scam indicators are present
-  let scamScore = 0;
+  // ONLY flag super obvious scams - be very conservative
   
-  // High-confidence scam keywords (instant flag)
-  const highConfidenceScams = [
-    'claim your',
-    'click here',
-    'free mint',
-    'congratulations you',
-    'you won',
-    'redeem now',
-    'visit to claim'
-  ];
-  
-  for (const phrase of highConfidenceScams) {
-    if (title.includes(phrase) || description.includes(phrase)) {
-      return true;
-    }
-  }
-  
-  // Medium confidence keywords (need multiple)
-  const mediumConfidenceScams = ['claim', 'reward', 'airdrop', 'prize', 'bonus'];
-  
-  for (const keyword of mediumConfidenceScams) {
-    if (title.includes(keyword)) scamScore++;
-    if (description.includes(keyword)) scamScore++;
-  }
-  
-  // Check for URLs in title (always suspicious)
+  // URLs in title (always sus)
   if (titleOriginal.match(/https?:\/\//)) {
     return true;
   }
   
-  // Check for all caps with numbers AND dollar signs/crypto terms
-  if (titleOriginal.match(/^[A-Z0-9\s]{15,}$/) && 
-      (titleOriginal.includes('BTC') || titleOriginal.includes('ETH') || titleOriginal.includes('$'))) {
+  // All caps + big numbers + crypto keywords
+  if (titleOriginal.match(/^[A-Z\s]+\d{4,}/) && 
+      (title.includes('btc') || title.includes('eth') || title.includes('usdt'))) {
     return true;
   }
   
-  // Only flag if scam score is 2 or higher
-  return scamScore >= 2;
+  // Multi-word scam phrases only
+  if (title.includes('claim your') || 
+      title.includes('click here') || 
+      title.includes('visit to') ||
+      title.includes('congratulations you') ||
+      title.includes('you won')) {
+    return true;
+  }
+  
+  return false;
 }
 
 async function getRandomNFTs() {
@@ -101,7 +82,7 @@ async function getRandomNFTs() {
               description: nft.description || ''
             };
             
-            // FILTER OUT SCAMS
+            // FILTER OUT SCAMS (very conservative now)
             if (!isScamNFT(nftData)) {
               allNFTs.push(nftData);
             }
