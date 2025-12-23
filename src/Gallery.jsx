@@ -133,14 +133,14 @@ export default function Gallery() {
           trackView(nfts[nextIndex].id);
         }
         
-        // Immediately fade back in after index updates
+        // Immediately fade back in
         requestAnimationFrame(() => {
           setFade(true);
         });
-      }, 400); // Match CSS fade-out duration
+      }, 400);
     };
     
-    // Fallback if image takes too long
+    // Shorter fallback - 500ms instead of 1000ms
     setTimeout(() => {
       if (!nextImage.complete) {
         nextImage.onload = null;
@@ -155,7 +155,7 @@ export default function Gallery() {
           });
         }, 400);
       }
-    }, 1000);
+    }, 500);
   }
 
   if (loading) {
