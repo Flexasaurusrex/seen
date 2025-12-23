@@ -27,7 +27,14 @@ export default function Gallery() {
       const response = await fetch(`${API_BASE}/gallery?mode=${galleryMode}`);
       const data = await response.json();
       
-      setNfts(data.nfts || []);
+      // SHUFFLE CLIENT-SIDE using Fisher-Yates for true randomization
+      const nftsArray = data.nfts || [];
+      for (let i = nftsArray.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [nftsArray[i], nftsArray[j]] = [nftsArray[j], nftsArray[i]];
+      }
+      
+      setNfts(nftsArray);
       setCurrentKeyword(data.keywords || data.collections || '');
       setCurrentIndex(0);
       setLoading(false);
@@ -40,8 +47,8 @@ export default function Gallery() {
         setCollectionInfo(null);
       }
       
-      if (data.nfts && data.nfts.length > 0) {
-        trackView(data.nfts[0].id);
+      if (nftsArray.length > 0) {
+        trackView(nftsArray[0].id);
       }
     } catch (error) {
       console.error('Error fetching gallery:', error);
