@@ -1,131 +1,191 @@
 import { sql } from '@vercel/postgres';
+import { Alchemy, Network } from 'alchemy-sdk';
+
+const alchemyEth = new Alchemy({
+  apiKey: process.env.ALCHEMY_API_KEY,
+  network: Network.ETH_MAINNET,
+});
+
+const alchemyBase = new Alchemy({
+  apiKey: process.env.ALCHEMY_API_KEY,
+  network: Network.BASE_MAINNET,
+});
+
+function isScamNFT(nft) {
+  const title = (nft.title || '').toLowerCase();
+  const description = (nft.description || '').toLowerCase();
+  const titleOriginal = nft.title || '';
+  
+  // Scam keywords
+  const scamKeywords = [
+    'claim',
+    'reward',
+    'visit',
+    'airdrop',
+    'free mint',
+    'click here',
+    'congratulations',
+    'winner',
+    'prize',
+    'redeem',
+    'bonus',
+    'giveaway',
+    'eth reward',
+    'btc reward',
+    'usdt',
+    'usdc reward'
+  ];
+  
+  // Check for scam keywords
+  for (const keyword of scamKeywords) {
+    if (title.includes(keyword) || description.includes(keyword)) {
+      return true;
+    }
+  }
+  
+  // Check for URLs in title (http:// or https://)
+  if (titleOriginal.match(/https?:\/\//)) {
+    return true;
+  }
+  
+  // Check for all caps with numbers (like "CLAIM 50000 BTC")
+  if (titleOriginal.match(/^[A-Z0-9\s]{10,}$/)) {
+    return true;
+  }
+  
+  return false;
+}
+
+async function getRandomNFTs() {
+  const activeKeywords = await sql`
+    SELECT keyword FROM keywords WHERE is_active = true ORDER BY sort_order ASC
+  `;
+
+  if (activeKeywords.rows.length === 0) {
+    return { nfts: [], keywords: '' };
+  }
+
+  const keyword = activeKeywords.rows[0].keyword;
+  const allNFTs = [];
+
+  try {
+    const ethResults = await alchemyEth.nft.searchContractMetadata(keyword);
+    const baseResults = await alchemyBase.nft.searchContractMetadata(keyword);
+
+    const contracts = [
+      ...ethResults.contracts.slice(0, 15).map(c => ({ address: c.address, chain: 'ethereum' })),
+      ...baseResults.contracts.slice(0, 15).map(c => ({ address: c.address, chain: 'base' }))
+    ];
+
+    for (const { address, chain } of contracts) {
+      try {
+        const alchemy = chain === 'ethereum' ? alchemyEth : alchemyBase;
+        const nftsResponse = await alchemy.nft.getNftsForContract(address, { pageSize: 20 });
+        
+        for (const nft of nftsResponse.nfts) {
+          const image = nft.image?.cachedUrl || nft.image?.originalUrl || nft.raw?.metadata?.image;
+          
+          if (image && (image.startsWith('http://') || image.startsWith('https://'))) {
+            const openseaChain = chain === 'base' ? 'base' : 'ethereum';
+            const openseaUrl = `https://opensea.io/assets/${openseaChain}/${nft.contract.address}/${nft.tokenId}`;
+            
+            const nftData = {
+              title: nft.name || nft.contract.name || 'Untitled',
+              creator_name: nft.contract.name || 'Unknown',
+              image_url: image,
+              external_url: nft.raw?.metadata?.external_url || openseaUrl,
+              chain: chain,
+              description: nft.description || ''
+            };
+            
+            // FILTER OUT SCAMS
+            if (!isScamNFT(nftData)) {
+              allNFTs.push(nftData);
+            }
+          }
+        }
+      } catch (err) {
+        console.error(`Error fetching NFTs for ${address}:`, err.message);
+      }
+    }
+  } catch (error) {
+    console.error('Error searching contracts:', error);
+  }
+
+  const shuffled = allNFTs.sort(() => Math.random() - 0.5);
+  const selected = shuffled.slice(0, 200);
+
+  return { nfts: selected, keywords: keyword };
+}
+
+async function getCuratedNFTs() {
+  const activeCollection = await sql`
+    SELECT * FROM curated_collections WHERE is_active = true LIMIT 1
+  `;
+
+  if (activeCollection.rows.length === 0) {
+    return { nfts: [], collections: '' };
+  }
+
+  const collectionId = activeCollection.rows[0].id;
+  const collectionName = activeCollection.rows[0].name;
+
+  const contracts = await sql`
+    SELECT cc.contract_id 
+    FROM collection_contracts cc
+    WHERE cc.collection_id = ${collectionId}
+    ORDER BY cc.sort_order ASC
+  `;
+
+  if (contracts.rows.length === 0) {
+    return { nfts: [], collections: collectionName };
+  }
+
+  const contractIds = contracts.rows.map(r => r.contract_id);
+
+  const nfts = await sql`
+    SELECT 
+      cnc.id,
+      cnc.title,
+      cnc.image_url,
+      cnc.external_url,
+      cc.artist_name as creator_name,
+      cc.chain
+    FROM curated_nft_cache cnc
+    JOIN curated_contracts cc ON cnc.contract_id = cc.id
+    WHERE cnc.contract_id = ANY(${contractIds})
+    ORDER BY RANDOM()
+  `;
+
+  return { nfts: nfts.rows, collections: collectionName };
+}
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  
-  if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
+
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
+  if (req.method !== 'GET') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
 
   try {
-    // Check for mode parameter: ?mode=curated or ?mode=random (default: random)
-    const mode = req.query.mode || 'random';
-    
+    const { mode = 'random' } = req.query;
+
+    let result;
     if (mode === 'curated') {
-      return await getCuratedGallery(res);
+      result = await getCuratedNFTs();
     } else {
-      return await getRandomGallery(res);
+      result = await getRandomNFTs();
     }
+
+    return res.json(result);
   } catch (error) {
-    console.error('Gallery error:', error);
+    console.error('Gallery API error:', error);
     return res.status(500).json({ error: error.message });
   }
-}
-
-// RANDOM MODE: Original keyword-based system
-async function getRandomGallery(res) {
-  // Get all active keywords
-  const activeKeywords = await sql`SELECT * FROM keywords WHERE is_active = true`;
-  
-  if (activeKeywords.rows.length === 0) {
-    return res.json({ nfts: [], keywords: [], mode: 'random' });
-  }
-
-  // Get NFTs from all active keywords
-  const keywordIds = activeKeywords.rows.map(k => k.id);
-  const nfts = await sql`
-    SELECT * FROM nft_cache 
-    WHERE keyword_id = ANY(${keywordIds})
-  `;
-
-  // Fisher-Yates shuffle
-  const shuffled = [...nfts.rows];
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-  }
-
-  return res.json({ 
-    nfts: shuffled,
-    keywords: activeKeywords.rows.map(k => k.keyword).join(', '),
-    mode: 'random'
-  });
-}
-
-// CURATED MODE: Show NFTs from curated contracts/collections
-async function getCuratedGallery(res) {
-  // Get all active curated collections
-  const activeCollections = await sql`
-    SELECT * FROM curated_collections 
-    WHERE is_active = true 
-    ORDER BY sort_order ASC
-  `;
-
-  if (activeCollections.rows.length === 0) {
-    return res.json({ 
-      nfts: [], 
-      collections: [],
-      mode: 'curated',
-      message: 'No active curated collections' 
-    });
-  }
-
-  // Get all contracts from active collections
-  const collectionIds = activeCollections.rows.map(c => c.id);
-  const contractsInCollections = await sql`
-    SELECT DISTINCT 
-      ctr.id as contract_id, 
-      ctr.contract_address, 
-      ctr.chain, 
-      ctr.collection_name, 
-      ctr.artist_name,
-      cc.sort_order
-    FROM collection_contracts cc
-    JOIN curated_contracts ctr ON cc.contract_id = ctr.id
-    WHERE cc.collection_id = ANY(${collectionIds})
-      AND ctr.is_active = true
-    ORDER BY cc.sort_order ASC
-  `;
-
-  if (contractsInCollections.rows.length === 0) {
-    return res.json({ 
-      nfts: [], 
-      collections: activeCollections.rows.map(c => c.name),
-      mode: 'curated',
-      message: 'No contracts in active collections'
-    });
-  }
-
-  // Get cached NFTs from these contracts
-  const contractIds = contractsInCollections.rows.map(c => c.contract_id);
-  const nfts = await sql`
-    SELECT 
-      cn.id,
-      cn.token_id,
-      cn.title,
-      cn.description,
-      cn.image_url,
-      cn.external_url,
-      ctr.contract_address,
-      ctr.chain,
-      ctr.collection_name,
-      ctr.artist_name as creator_name
-    FROM curated_nft_cache cn
-    JOIN curated_contracts ctr ON cn.contract_id = ctr.id
-    WHERE cn.contract_id = ANY(${contractIds})
-  `;
-
-  // Fisher-Yates shuffle
-  const shuffled = [...nfts.rows];
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-  }
-
-  return res.json({ 
-    nfts: shuffled,
-    collections: activeCollections.rows.map(c => c.name).join(', '),
-    mode: 'curated'
-  });
 }
