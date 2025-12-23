@@ -16,44 +16,47 @@ function isScamNFT(nft) {
   const description = (nft.description || '').toLowerCase();
   const titleOriginal = nft.title || '';
   
-  // Scam keywords
-  const scamKeywords = [
-    'claim',
-    'reward',
-    'visit',
-    'airdrop',
-    'free mint',
+  // Only flag if MULTIPLE scam indicators are present
+  let scamScore = 0;
+  
+  // High-confidence scam keywords (instant flag)
+  const highConfidenceScams = [
+    'claim your',
     'click here',
-    'congratulations',
-    'winner',
-    'prize',
-    'redeem',
-    'bonus',
-    'giveaway',
-    'eth reward',
-    'btc reward',
-    'usdt',
-    'usdc reward'
+    'free mint',
+    'congratulations you',
+    'you won',
+    'redeem now',
+    'visit to claim'
   ];
   
-  // Check for scam keywords
-  for (const keyword of scamKeywords) {
-    if (title.includes(keyword) || description.includes(keyword)) {
+  for (const phrase of highConfidenceScams) {
+    if (title.includes(phrase) || description.includes(phrase)) {
       return true;
     }
   }
   
-  // Check for URLs in title (http:// or https://)
+  // Medium confidence keywords (need multiple)
+  const mediumConfidenceScams = ['claim', 'reward', 'airdrop', 'prize', 'bonus'];
+  
+  for (const keyword of mediumConfidenceScams) {
+    if (title.includes(keyword)) scamScore++;
+    if (description.includes(keyword)) scamScore++;
+  }
+  
+  // Check for URLs in title (always suspicious)
   if (titleOriginal.match(/https?:\/\//)) {
     return true;
   }
   
-  // Check for all caps with numbers (like "CLAIM 50000 BTC")
-  if (titleOriginal.match(/^[A-Z0-9\s]{10,}$/)) {
+  // Check for all caps with numbers AND dollar signs/crypto terms
+  if (titleOriginal.match(/^[A-Z0-9\s]{15,}$/) && 
+      (titleOriginal.includes('BTC') || titleOriginal.includes('ETH') || titleOriginal.includes('$'))) {
     return true;
   }
   
-  return false;
+  // Only flag if scam score is 2 or higher
+  return scamScore >= 2;
 }
 
 async function getRandomNFTs() {
@@ -112,8 +115,8 @@ async function getRandomNFTs() {
     console.error('Error searching contracts:', error);
   }
 
-  const shuffled = allNFTs.sort(() => Math.random() - 0.5);
-  const selected = shuffled.slice(0, 200);
+  // NO SERVER-SIDE SHUFFLE - client will handle randomization
+  const selected = allNFTs.slice(0, 200);
 
   return { nfts: selected, keywords: keyword };
 }
