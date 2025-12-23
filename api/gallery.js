@@ -62,9 +62,7 @@ async function getRandomNFTs() {
     console.error('Error searching contracts:', error);
   }
 
-  const selected = allNFTs.slice(0, 200);
-
-  return { nfts: selected, keywords: keyword };
+  return { nfts: allNFTs, keywords: keyword };
 }
 
 async function getCuratedNFTs() {
