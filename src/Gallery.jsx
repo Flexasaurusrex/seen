@@ -118,20 +118,29 @@ export default function Gallery() {
       attempts++;
     }
     
+    // Preload the image
     const nextImage = new Image();
     nextImage.src = nfts[nextIndex]?.image_url;
     
     nextImage.onload = () => {
+      // Fade out
       setFade(false);
+      
+      // Wait for fade out to complete, then update index
       setTimeout(() => {
         setCurrentIndex(nextIndex);
         if (nfts[nextIndex]) {
           trackView(nfts[nextIndex].id);
         }
-        setTimeout(() => setFade(true), 50);
-      }, 400);
+        
+        // Immediately fade back in after index updates
+        requestAnimationFrame(() => {
+          setFade(true);
+        });
+      }, 400); // Match CSS fade-out duration
     };
     
+    // Fallback if image takes too long
     setTimeout(() => {
       if (!nextImage.complete) {
         nextImage.onload = null;
@@ -141,7 +150,9 @@ export default function Gallery() {
           if (nfts[nextIndex]) {
             trackView(nfts[nextIndex].id);
           }
-          setTimeout(() => setFade(true), 50);
+          requestAnimationFrame(() => {
+            setFade(true);
+          });
         }, 400);
       }
     }, 1000);
