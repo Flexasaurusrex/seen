@@ -122,40 +122,31 @@ export default function Gallery() {
     const nextImage = new Image();
     nextImage.src = nfts[nextIndex]?.image_url;
     
-    nextImage.onload = () => {
-      // Fade out
-      setFade(false);
+    let transitioned = false;
+    
+    const doTransition = () => {
+      if (transitioned) return;
+      transitioned = true;
       
-      // Wait for fade out to complete, then update index
+      setFade(false);
       setTimeout(() => {
         setCurrentIndex(nextIndex);
         if (nfts[nextIndex]) {
           trackView(nfts[nextIndex].id);
         }
-        
-        // Immediately fade back in
-        requestAnimationFrame(() => {
-          setFade(true);
-        });
+        setTimeout(() => setFade(true), 50);
       }, 400);
     };
     
-    // Shorter fallback - 500ms instead of 1000ms
+    // Transition when image loads
+    nextImage.onload = () => {
+      doTransition();
+    };
+    
+    // Or after 2 seconds max wait
     setTimeout(() => {
-      if (!nextImage.complete) {
-        nextImage.onload = null;
-        setFade(false);
-        setTimeout(() => {
-          setCurrentIndex(nextIndex);
-          if (nfts[nextIndex]) {
-            trackView(nfts[nextIndex].id);
-          }
-          requestAnimationFrame(() => {
-            setFade(true);
-          });
-        }, 400);
-      }
-    }, 500);
+      doTransition();
+    }, 2000);
   }
 
   if (loading) {
