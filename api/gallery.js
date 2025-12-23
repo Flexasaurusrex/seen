@@ -11,38 +11,9 @@ const alchemyBase = new Alchemy({
   network: Network.BASE_MAINNET,
 });
 
-function isScamNFT(nft) {
-  const title = (nft.title || '').toLowerCase();
-  const titleOriginal = nft.title || '';
-  
-  // ONLY flag super obvious scams - be very conservative
-  
-  // URLs in title (always sus)
-  if (titleOriginal.match(/https?:\/\//)) {
-    return true;
-  }
-  
-  // All caps + big numbers + crypto keywords
-  if (titleOriginal.match(/^[A-Z\s]+\d{4,}/) && 
-      (title.includes('btc') || title.includes('eth') || title.includes('usdt'))) {
-    return true;
-  }
-  
-  // Multi-word scam phrases only
-  if (title.includes('claim your') || 
-      title.includes('click here') || 
-      title.includes('visit to') ||
-      title.includes('congratulations you') ||
-      title.includes('you won')) {
-    return true;
-  }
-  
-  return false;
-}
-
 async function getRandomNFTs() {
   const activeKeywords = await sql`
-    SELECT keyword FROM keywords WHERE is_active = true ORDER BY sort_order ASC
+    SELECT keyword FROM keywords WHERE is_active = true LIMIT 1
   `;
 
   if (activeKeywords.rows.length === 0) {
@@ -73,19 +44,14 @@ async function getRandomNFTs() {
             const openseaChain = chain === 'base' ? 'base' : 'ethereum';
             const openseaUrl = `https://opensea.io/assets/${openseaChain}/${nft.contract.address}/${nft.tokenId}`;
             
-            const nftData = {
+            allNFTs.push({
               title: nft.name || nft.contract.name || 'Untitled',
               creator_name: nft.contract.name || 'Unknown',
               image_url: image,
               external_url: nft.raw?.metadata?.external_url || openseaUrl,
               chain: chain,
               description: nft.description || ''
-            };
-            
-            // FILTER OUT SCAMS (very conservative now)
-            if (!isScamNFT(nftData)) {
-              allNFTs.push(nftData);
-            }
+            });
           }
         }
       } catch (err) {
@@ -96,7 +62,6 @@ async function getRandomNFTs() {
     console.error('Error searching contracts:', error);
   }
 
-  // NO SERVER-SIDE SHUFFLE - client will handle randomization
   const selected = allNFTs.slice(0, 200);
 
   return { nfts: selected, keywords: keyword };
